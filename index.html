@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Philippine Nuclear Reactor Financial Simulator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 240px;
+            background-color: #334155;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 50;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -120px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%; left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #334155 transparent transparent transparent;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        /* Custom styles for range inputs */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            background: #e2e8f0; /* slate-200 */
+            outline: none;
+            border-radius: 9999px;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4f46e5; /* indigo-600 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.05);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4f46e5; /* indigo-600 */
+            cursor: pointer;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+        .tab-button.active {
+            background-color: #4f46e5; /* indigo-600 */
+            color: white;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 100; opacity: 0; visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content {
+            background-color: white; padding: 24px; border-radius: 12px;
+            max-width: 500px; width: 90%;
+            transform: scale(0.95); transition: transform 0.3s;
+        }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .help-icon {
+            cursor: pointer; color: #94a3b8; margin-left: 4px; display: inline-flex;
+            align-items: center; justify-content: center; width: 16px; height: 16px;
+            border: 1px solid #cbd5e1; border-radius: 50%; font-size: 10px; font-weight: bold;
+        }
+        .help-icon:hover { background-color: #e2e8f0; color: #64748b; }
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 50px; height: 28px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #4f46e5; } /* indigo-600 */
+        input:checked + .slider:before { transform: translateX(22px); }
+        #map { height: 200px; border-radius: 0.5rem; margin-top: 1rem; z-index: 1; }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-6">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">Philippine Nuclear Reactor Financial Simulator</h1>
+            <p class="text-slate-600 mt-2 max-w-2xl mx-auto">An advanced tool to model the financial and engineering viability of nuclear power options for the Philippines.</p>
+        </header>
+
+        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-slate-700">Simulation Parameters</h2>
+                    <button id="resetButton" class="text-sm font-medium text-indigo-600 hover:text-indigo-800">Reset</button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="deploymentStrategy" class="block text-sm font-medium text-gray-700 mb-2">Deployment Strategy<span class="help-icon" data-modal="deploymentStrategy">(?)</span></label>
+                        <select id="deploymentStrategy" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                            <option value="single">Single Large Plant</option>
+                            <option value="fleet">SMR Fleet (DOE 1200MW Target)</option>
+                        </select>
+                    </div>
+
+                    <div id="smrFleetOptions" class="hidden space-y-4 p-4 bg-slate-50 rounded-lg">
+                         <p id="smrFleetSummary" class="text-sm text-center font-medium text-slate-600">Target: 1200 MWe</p>
+                         <div>
+                            <div class="flex justify-between items-center"><label for="fleetCapexDiscount" class="block text-sm font-medium text-gray-700">Fleet CAPEX Discount (%)<span class="help-icon" data-modal="fleetCapexDiscount">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="fleetCapexDiscount" min="0" max="30" step="1" value="15" class="w-full"><span id="fleetCapexDiscountValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">15%</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="reactorType" class="block text-sm font-medium text-gray-700 mb-2">Reactor Type <span class="help-icon" data-modal="reactorType">(?)</span></label>
+                        <select id="reactorType" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                            <!-- Options will be populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <!-- Updated Tabs Navigation: now wraps on smaller screens -->
+                    <nav class="flex flex-wrap gap-2 pb-2 border-b border-gray-200" aria-label="Tabs">
+                        <button class="tab-button active flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium rounded-md transition-colors" data-tab="site">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path fill-rule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.976 2.343-1.8a18.847 18.847 0 002.583-3.26C19.042 10.743 19 10.332 19 10a9 9 0 10-18 0c0 .332.042.743.25 1.258a18.847 18.847 0 002.583 3.26c.898.824 1.723 1.417 2.343 1.8.31.193.57.337.757.433.09.046.17.09.28.14l.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clip-rule="evenodd" /></svg>
+                            Site
+                        </button>
+                        <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="financial">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path d="M3.5 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zM5 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zM6.5 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zM8 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zM9.5 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zm1.5 0a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zm1.5 0a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zm1.5 0a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zm1.5 0a.5.5 0 00-1 0v11a.5.5 0 001 0v-11zM17 4.5a.5.5 0 00-1 0v11a.5.5 0 001 0v-11z" /><path fill-rule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h13A1.5 1.5 0 0118 3.5v13a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 012 16.5v-13zM3.5 3a.5.5 0 00-.5.5v13a.5.5 0 00.5.5h13a.5.5 0 00.5-.5v-13a.5.5 0 00-.5-.5h-13z" clip-rule="evenodd" /></svg>
+                            Financial
+                        </button>
+                        <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="financing">
+                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path d="M4.5 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM6 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM7.5 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM9 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM10.5 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM12 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM13.5 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM15 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13zM16.5 3.5a.5.5 0 00-1 0v13a.5.5 0 001 0v-13z" /><path fill-rule="evenodd" d="M2 2a1 1 0 011-1h14a1 1 0 011 1v16a1 1 0 01-1 1H3a1 1 0 01-1-1V2zm1.5 0a.5.5 0 00-.5.5v15a.5.5 0 00.5.5h13a.5.5 0 00.5-.5V2.5a.5.5 0 00-.5-.5h-13z" clip-rule="evenodd" /></svg>
+                            Financing
+                        </button>
+                        <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="operational">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path fill-rule="evenodd" d="M11.49 3.17a.75.75 0 01.447.882l-1 4.5a.75.75 0 01-1.445-.324l1-4.5a.75.75 0 01.998-.558zM12.25 10a.75.75 0 00-1.5 0v.5a.75.75 0 001.5 0v-.5zM13.25 3.424a.75.75 0 01.277 1.018l-1 1.75a.75.75 0 01-1.3-.75l1-1.75a.75.75 0 011.023-.268zM15.5 5.75a.75.75 0 00-1.5 0v.5a.75.75 0 001.5 0v-.5zM16.096 4.344a.75.75 0 01.034 1.06l-1 1.5a.75.75 0 01-1.128-.974l1-1.5a.75.75 0 011.094-.086z" clip-rule="evenodd" /><path d="M10 2a8 8 0 100 16 8 8 0 000-16zM3.5 10a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z" /></svg>
+                            Operational
+                        </button>
+                         <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="fuel_waste">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path fill-rule="evenodd" d="M10.832 2.912c.36-.03.722-.047 1.088-.047 2.376 0 4.526.853 6.168 2.25.432.368.612.96.483 1.516l-.768 3.388c-.12.528-.472.936-1.002 1.122l-2.408.868c-1.07.385-1.922-1.054-1.142-1.84L15 8.586a1.25 1.25 0 011.768 0l.707.707a1.25 1.25 0 010 1.768l-2.036 2.036a.75.75 0 01-1.06 0l-3-3a.75.75 0 010-1.06l1.373-1.373a.75.75 0 011.118.057l.868.976a.75.75 0 01-.132 1.132l-.066.058-1.42 1.242a.75.75 0 01-1.062-.06L9.5 13.525a.75.75 0 010-1.06l2.036-2.036a1.25 1.25 0 011.768 0l.707.707a1.25 1.25 0 010 1.768L12.01 15.63l-.008.008a1.25 1.25 0 01-1.768 0l-3.38-3.38a1.25 1.25 0 010-1.768l.707-.707a1.25 1.25 0 011.768 0l.585.586a.75.75 0 01.854.218c.31-.41.758-.758 1.242-1.002l1.242-.621a1.25 1.25 0 00.868-1.156l.243-1.18a3.75 3.75 0 00-2.822-4.045c-.38-.067-.77-.102-1.168-.102-3.106 0-5.833 1.253-7.794 3.214a.75.75 0 01-1.06-1.06C3.93 5.43 6.894 4 10.25 4c.19 0 .378.006.566.017l.116.006z" clip-rule="evenodd" /></svg>
+                            Fuel & Waste
+                        </button>
+                        <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="economic">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path d="M3 12.5A2.5 2.5 0 015.5 10h9a2.5 2.5 0 012.5 2.5v3A2.5 2.5 0 0114.5 18h-9A2.5 2.5 0 013 15.5v-3z" /><path d="M13.5 10V6.375a3.375 3.375 0 00-3.375-3.375h-3.75A3.375 3.375 0 003 6.375V10" /><path d="M10 9a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg>
+                            Economic
+                        </button>
+                    </nav>
+
+                     <div id="site" class="tab-content py-4 space-y-4">
+                        <div>
+                            <label for="siteLocation" class="block text-sm font-medium text-gray-700">Site Location<span class="help-icon" data-modal="siteLocation">(?)</span></label>
+                            <select id="siteLocation" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <option value="bataan">Bataan Peninsula</option>
+                                <option value="cagayan">Cagayan North</option>
+                                <option value="palawan">Palawan</option>
+                                <option value="cebu">Cebu</option>
+                                <option value="davnor">Davao del Norte</option>
+                            </select>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+
+                    <div id="financial" class="tab-content hidden py-4 space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center"><label for="constructionOverrun" class="block text-sm font-medium text-gray-700">Construction Overrun (%)<span class="help-icon" data-modal="constructionOverrun">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="constructionOverrun" min="0" max="100" step="1" value="0" class="w-full"><span id="constructionOverrunValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0%</span></div>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Use Decommissioning Fund<span class="help-icon" data-modal="decommissioningFund">(?)</span></span>
+                            <label class="switch">
+                                <input type="checkbox" id="useDecomFundToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div id="decomLumpSum">
+                            <div class="flex justify-between items-center"><label for="decommissioningCost" class="block text-sm font-medium text-gray-700">Decommissioning (% CAPEX)<span class="help-icon" data-modal="decommissioningCost">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="decommissioningCost" min="0" max="50" value="15" class="w-full"><span id="decommissioningCostValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">15%</span></div>
+                        </div>
+                        <div class="border-t pt-4 space-y-2">
+                             <h4 class="text-sm font-semibold text-slate-600">Project & Supply Chain</h4>
+                             <div>
+                                <label for="epcContractor" class="block text-sm font-medium text-gray-700">EPC Contractor<span class="help-icon" data-modal="epcContractor">(?)</span></label>
+                                <select id="epcContractor" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="generic">Generic (+0% CAPEX, +0% Risk)</option>
+                                    <option value="bechtel">Bechtel (USA) (+8% CAPEX, +5% Risk)</option>
+                                    <option value="fluor">Fluor (USA) (+7% CAPEX, +10% Risk)</option>
+                                    <option value="kepco_enc">KEPCO E&C (S. Korea) (+2% CAPEX, +0% Risk)</option>
+                                    <option value="rosatom_ase">Rosatom ASE (Russia) (-8% CAPEX, +15% Risk)</option>
+                                    <option value="cgn">CGN (China) (-12% CAPEX, +5% Risk)</option>
+                                    <option value="cnnc">CNNC (China) (-10% CAPEX, +8% Risk)</option>
+                                    <option value="lt_construction">L&T Construction (India) (+0% CAPEX, +12% Risk)</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label for="turbineSupplier" class="block text-sm font-medium text-gray-700">Turbine Generator<span class="help-icon" data-modal="turbineSupplier">(?)</span></label>
+                                <select id="turbineSupplier" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="generic">Generic (+0%)</option>
+                                    <optgroup label="GE Power (USA)"><option value="ge_arabelle1700">GE Arabelle 1700 (+2.5%)</option><option value="ge_arabelle1000">GE Arabelle 1000 (+2.2%)</option><option value="ge_stf_d650">GE STF-D650 (+1.8%)</option><option value="ge_stf_a650">GE STF-A650 (+1.5%)</option></optgroup>
+                                    <optgroup label="Siemens Energy (Germany)"><option value="siemens_sst9000">Siemens SST-9000 (+2.8%)</option><option value="siemens_sst6000">Siemens SST-6000 (+2.4%)</option><option value="siemens_sst5000">Siemens SST-5000 (+2.0%)</option></optgroup>
+                                    <optgroup label="Mitsubishi (Japan)"><option value="mhi_tc4f">MHI TC4F Series (+1.5%)</option><option value="mhi_tc2f">MHI TC2F Series (+1.2%)</option><option value="mhi_bb4f">MHI BB4F Series (+1.0%)</option></optgroup>
+                                    <optgroup label="EDF / Arabelle (France)"><option value="edf_arabelle1770">Arabelle 1770 (EPR) (+2.6%)</option><option value="edf_arabelle1200">Arabelle 1200 (VVER) (+2.3%)</option></optgroup>
+                                    <optgroup label="Rosatom / Power Machines (Russia)"><option value="pm_k1200">Power Machines K-1200-6.8/50 (-0.5%)</option><option value="pm_k1000">Power Machines K-1000-60/1500 (-0.8%)</option><option value="pm_t1250">Power Machines T-1250 (-1.0%)</option></optgroup>
+                                    <optgroup label="Doosan (S. Korea)"><option value="doosan_apr1400">Doosan Turbine (APR-1400) (+1.2%)</option><option value="doosan_optimised">Doosan Optimized 1000MW (+1.0%)</option></optgroup>
+                                    <optgroup label="Dongfang Electric (China)"><option value="dongfang_1750mw">Dongfang 1750MW (-1.5%)</option><option value="dongfang_1200mw">Dongfang 1200MW (-1.8%)</option><option value="dongfang_1000mw">Dongfang 1000MW (-2.0%)</option></optgroup>
+                                    <optgroup label="Harbin Electric (China)"><option value="harbin_1500mw">Harbin 1500MW (-1.6%)</option><option value="harbin_1000mw">Harbin 1000MW (-1.9%)</option></optgroup>
+                                    <optgroup label="BHEL (India)"><option value="bhel_700phwr">BHEL 700MW (PHWR) (+0.5%)</option><option value="bhel_500phwr">BHEL 500MW (PHWR) (+0.3%)</option></optgroup>
+                                    <optgroup label="Toshiba ESS (Japan)"><option value="toshiba_abwr">Toshiba Turbine (ABWR) (+1.4%)</option><option value="toshiba_large">Toshiba Large Capacity (+1.6%)</option></optgroup>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="rpvSupplier" class="block text-sm font-medium text-gray-700">Reactor Pressure Vessel<span class="help-icon" data-modal="rpvSupplier">(?)</span></label>
+                                <select id="rpvSupplier" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="generic">Generic (+0%)</option>
+                                    <optgroup label="Japan Steel Works (Japan)"><option value="jsw_epr">JSW for EPR (+3.5%)</option><option value="jsw_ap1000">JSW for AP1000 (+3.2%)</option><option value="jsw_abwr">JSW for ABWR (+3.0%)</option><option value="jsw_smr">JSW for SMRs (+2.8%)</option></optgroup>
+                                    <optgroup label="Doosan Enerbility (S. Korea)"><option value="doosan_apr1400">Doosan for APR-1400 (+1.5%)</option><option value="doosan_ap1000">Doosan for AP1000 (+1.2%)</option><option value="doosan_smr">Doosan for SMRs (+1.0%)</option></optgroup>
+                                    <optgroup label="Framatome Forge (France)"><option value="framatome_epr">Framatome for EPR (+2.8%)</option><option value="framatome_pwr">Framatome for PWR (+2.5%)</option></optgroup>
+                                    <optgroup label="AEM-Tech / Atommash (Russia)"><option value="aem_vver1200">AEM for VVER-1200 (-1.0%)</option><option value="aem_vvertoi">AEM for VVER-TOI (-1.2%)</option><option value="aem_smr">AEM for SMRs (-1.5%)</option></optgroup>
+                                    <optgroup label="China First Heavy Ind. (CFHI)"><option value="cfhi_hualong">CFHI for Hualong One (-2.0%)</option><option value="cfhi_ap1000">CFHI for AP1000 (-2.2%)</option><option value="cfhi_gen3">CFHI Gen III (-2.5%)</option></optgroup>
+                                    <optgroup label="Shanghai Electric (China)"><option value="shanghai_hualong">Shanghai Elec. for Hualong One (-1.8%)</option><option value="shanghai_ap1000">Shanghai Elec. for AP1000 (-2.0%)</option></optgroup>
+                                    <optgroup label="Larsen & Toubro (India)"><option value="lt_phwr700">L&T for PHWR 700 (+0.5%)</option><option value="lt_pwr">L&T for PWR (+0.8%)</option></optgroup>
+                                    <optgroup label="Creusot Forge (France)"><option value="creusot_epr2">Creusot for EPR2 (+2.6%)</option><option value="creusot_pwr_n4">Creusot for N4 PWR (+2.4%)</option></optgroup>
+                                    <optgroup label="OMZ Izhora (Russia)"><option value="omz_vver1000">OMZ for VVER-1000 (-0.9%)</option><option value="omz_vver440">OMZ for VVER-440 (-1.1%)</option></optgroup>
+                                    <optgroup label="BWX Technologies (USA)"><option value="bwxt_smr">BWXT for SMRs (+2.2%)</option><option value="bwxt_mreactors">BWXT for Microreactors (+2.5%)</option></optgroup>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="financing" class="tab-content hidden py-4 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium text-gray-700">Use WACC for Discount Rate<span class="help-icon" data-modal="waccToggle">(?)</span></span>
+                            <label class="switch">
+                                <input type="checkbox" id="useWaccToggle" checked>
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div id="waccCalculator" class="space-y-4">
+                            <div class="border-t pt-4">
+                                <label for="jvPartner" class="block text-sm font-medium text-gray-700">Joint Venture Partner<span class="help-icon" data-modal="jvPartner">(?)</span></label>
+                                <select id="jvPartner" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="none">None (Standard Risk)</option>
+                                    <option value="aboitiz">Aboitiz Power (-1.0% CoE)</option>
+                                    <option value="meralco">Meralco / MPIC (-0.8% CoE)</option>
+                                    <option value="smc">San Miguel Corp (+0.5% CoE)</option>
+                                </select>
+                            </div>
+                            <div>
+                                 <div class="flex justify-between items-center"><label for="debtRatio" class="block text-sm font-medium text-gray-700">Debt Ratio (%)<span class="help-icon" data-modal="debtRatio">(?)</span></label></div>
+                                <div class="flex items-center space-x-4"><input type="range" id="debtRatio" min="0" max="90" step="1" value="70" class="w-full"><span id="debtRatioValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">70%</span></div>
+                            </div>
+                             <div>
+                                <div class="flex justify-between items-center"><label for="costOfEquity" class="block text-sm font-medium text-gray-700">Cost of Equity (%)<span class="help-icon" data-modal="costOfEquity">(?)</span></label></div>
+                                <div class="flex items-center space-x-4"><input type="range" id="costOfEquity" min="5" max="25" step="0.1" value="12" class="w-full"><span id="costOfEquityValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">12.0%</span></div>
+                            </div>
+                             <div>
+                                <label for="loanProvider" class="block text-sm font-medium text-gray-700">Loan Provider (Cost of Debt)<span class="help-icon" data-modal="loanProvider">(?)</span></label>
+                                <select id="loanProvider" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="comm_bank">Commercial Bank (6.5%)</option>
+                                    <option value="us_exim">US EXIM Bank (4.0%)</option>
+                                    <option value="jbic">JBIC (Japan) (3.5%)</option>
+                                    <option value="kexim">KEXIM (S. Korea) (3.8%)</option>
+                                    <option value="bpi_france">BPI France (4.2%)</option>
+                                    <option value="sberbank">Sberbank (Russia) (5.5%)</option>
+                                    <option value="china_dev_bank">China Development Bank (4.5%)</option>
+                                    <option value="world_bank">World Bank / IFC (5.0%)</option>
+                                </select>
+                            </div>
+                             <div>
+                                <label for="taxRate" class="block text-sm font-medium text-gray-700">Corporate Tax Rate (%)<span class="help-icon" data-modal="taxRate">(?)</span></label>
+                                <input type="number" id="taxRate" value="25" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                             </div>
+                              <div class="border-t pt-4">
+                                <label for="govtSupport" class="block text-sm font-medium text-gray-700">Government Support<span class="help-icon" data-modal="govtSupport">(?)</span></label>
+                                <select id="govtSupport" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="none">None</option>
+                                    <option value="loan_guarantee">Sovereign Loan Guarantee</option>
+                                    <option value="ptc">Production Tax Credit (PTC)</option>
+                                </select>
+                                <div id="ptc_input" class="hidden mt-2">
+                                     <label for="ptcValue" class="block text-sm font-medium text-gray-700">PTC Value (₱/MWh)</label>
+                                    <input type="number" id="ptcValue" value="580" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                             </div>
+                             <div class="text-center bg-slate-50 p-3 rounded-lg">
+                                <p class="text-sm font-medium text-slate-500">Calculated WACC</p>
+                                <p id="waccValue" class="text-lg font-bold text-indigo-700">0.00%</p>
+                             </div>
+                        </div>
+                         <div id="manualDiscountRate" class="hidden space-y-4 border-t pt-4">
+                            <div class="flex justify-between items-center"><label for="discountRateManual" class="block text-sm font-medium text-gray-700">Manual Discount Rate (%)<span class="help-icon" data-modal="discountRate">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="discountRateManual" min="1" max="15" step="0.1" value="8" class="w-full"><span id="discountRateValueManual" class="text-sm font-semibold text-indigo-700 w-16 text-right">8.0%</span></div>
+                        </div>
+                    </div>
+
+                    <div id="operational" class="tab-content hidden py-4 space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center"><label for="capacity" class="block text-sm font-medium text-gray-700">Power Capacity (MWe)<span class="help-icon" data-modal="capacity">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="capacity" min="1" max="1800" value="620" class="w-full"><span id="capacityValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">620 MWe</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center"><label for="lifetime" class="block text-sm font-medium text-gray-700">Plant Lifetime (Years)<span class="help-icon" data-modal="lifetime">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="lifetime" min="20" max="80" value="60" class="w-full"><span id="lifetimeValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">60 Yrs</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center"><label for="constructionTime" class="block text-sm font-medium text-gray-700">Construction Time (Years)<span class="help-icon" data-modal="constructionTime">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="constructionTime" min="1" max="15" value="8" class="w-full"><span id="constructionTimeValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">8 Yrs</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center "><label for="capacityFactor" class="block text-sm font-medium text-gray-700">Capacity Factor (%)<span class="help-icon" data-modal="capacityFactor">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="capacityFactor" min="50" max="100" value="90" class="w-full"><span id="capacityFactorValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">90%</span></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center"><label for="thermalEfficiency" class="block text-sm font-medium text-gray-700">Thermal Efficiency (%)<span class="help-icon" data-modal="thermalEfficiency">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="thermalEfficiency" min="20" max="55" step="0.5" value="33" class="w-full"><span id="thermalEfficiencyValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">33.0%</span></div>
+                        </div>
+                        
+                        <div class="border-t pt-4 space-y-2">
+                             <h4 class="text-sm font-semibold text-slate-600">Operations & Insurance</h4>
+                            <label for="omContractor" class="block text-sm font-medium text-gray-700">O&M Contractor<span class="help-icon" data-modal="omContractor">(?)</span></label>
+                            <select id="omContractor" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <option value="generic">In-house (+0%)</option>
+                                <option value="framatome_om">Framatome (+8%)</option>
+                                <option value="westinghouse_om">Westinghouse (+10%)</option>
+                                <option value="ge_om">GE-Hitachi (+7%)</option>
+                                <option value="kepco_kps">KEPCO KPS (+2%)</option>
+                                <option value="rosenergoatom">Rosenergoatom (-5%)</option>
+                                <option value="day_zimmermann">Day & Zimmermann (+5%)</option>
+                            </select>
+                            <label for="insuranceProvider" class="block text-sm font-medium text-gray-700">Insurance Provider<span class="help-icon" data-modal="insuranceProvider">(?)</span></label>
+                            <select id="insuranceProvider" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                 <option value="generic_pool">Generic Pool</option>
+                                <option value="ani">American Nuclear Insurers (ANI)</option>
+                                <option value="emani">EMANI (European)</option>
+                                <option value="cnip">Chinese Nuclear Insurance Pool</option>
+                                <option value="nri">Nuclear Risk Insurers (UK)</option>
+                                <option value="jaeip">JAEIP (Japan)</option>
+                                <option value="rnip">RNIP (Russia)</option>
+                                <option value="kaeip">KAEIP (Korea)</option>
+                                <option value="swiss_pool">Swiss Pool for Nuclear Risks</option>
+                                <option value="dkvg">DKVG (Germany)</option>
+                                <option value="spanish_pool">Spanish Nuclear Insurance Pool</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                     <div id="fuel_waste" class="tab-content hidden py-4 space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center"><label for="fuelBurnup" class="block text-sm font-medium text-gray-700">Fuel Burnup (GWd/tU)<span class="help-icon" data-modal="fuelBurnup">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="fuelBurnup" min="5" max="200" value="45" class="w-full"><span id="fuelBurnupValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">45 GWd/tU</span></div>
+                        </div>
+                        <div>
+                            <label for="fuelSupplier" class="block text-sm font-medium text-gray-700">Fuel Cycle Supplier<span class="help-icon" data-modal="fuelSupplier">(?)</span></label>
+                            <select id="fuelSupplier" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <optgroup label="Integrated Suppliers"><option value="generic">Generic Spot Market (+0%)</option><option value="rosatom_tvel">Rosatom/TVEL (Russia) (-10%)</option><option value="orano">Orano (France) (+2%)</option><option value="cgn_cnnc">CGN / CNNC (China) (-3%)</option><option value="kepco">KEPCO NF (South Korea) (+4%)</option><option value="westinghouse">Westinghouse (USA) (+7%)</option></optgroup>
+                                <optgroup label="Uranium Miners"><option value="kazatomprom">Kazatomprom (Kazakhstan) (-5%)</option><option value="cameco">Cameco (Canada) (+5%)</option><option value="navoi">Navoi MMC (Uzbekistan) (-4%)</option><option value="bhp">BHP Olympic Dam (Australia) (+3%)</option><option value="yellowcake">Yellow Cake plc (Jersey) (+1%)</option><option value="cg_nuc">CGN Mining (China) (-2%)</option><option value="paladin">Paladin Energy (Namibia) (+4%)</option><option value="boss">Boss Energy (Australia) (+3.5%)</option></optgroup>
+                                <optgroup label="Converters & Enrichers"><option value="converdyn">ConverDyn (USA) (+1.5%)</option><option value="met_zavod">Metallurgical Plant (Russia) (-8%)</option><option value="urenco">Urenco (UK/DE/NL) (+6%)</option><option value="centrus">Centrus Energy (USA) (+6.5%)</option><option value="silex">Silex Systems (Australia) (+5.5%)</option></optgroup>
+                                <optgroup label="Fuel Fabricators"><option value="gnf">Global Nuclear Fuel (GE/Hitachi) (+5%)</option><option value="framatome_fuel">Framatome Fuel (France) (+5.5%)</option><option value="msz">MSZ Machinery (Rosatom) (-7%)</option></optgroup>
+                            </select>
+                        </div>
+                        <div>
+                             <div class="flex justify-between items-center"><label for="geopoliticalRisk" class="block text-sm font-medium text-gray-700">Geopolitical Risk Premium (%)<span class="help-icon" data-modal="geopoliticalRisk">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="geopoliticalRisk" min="0" max="50" step="1" value="0" class="w-full"><span id="geopoliticalRiskValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0%</span></div>
+                        </div>
+
+                        <div id="deuteriumSection" class="hidden border-t pt-4 space-y-2">
+                             <h4 class="text-sm font-semibold text-slate-600">Deuterium (Heavy Water)</h4>
+                             <label for="deuteriumCost" class="block text-sm font-medium text-gray-700">Cost (PHP per 1000L)<span class="help-icon" data-modal="deuteriumCost">(?)</span></label>
+                             <input type="number" id="deuteriumCost" value="29000000" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                             <label for="deuteriumSource" class="block text-sm font-medium text-gray-700">Source<span class="help-icon" data-modal="deuteriumSource">(?)</span></label>
+                              <select id="deuteriumSource" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <option value="local">Local Sourcing</option>
+                                <option value="foreign">Foreign Sourcing</option>
+                            </select>
+                        </div>
+
+                         <div class="border-t pt-4 space-y-2">
+                            <h4 class="text-sm font-semibold text-slate-600">Waste Disposal</h4>
+                            <label for="wasteDisposal" class="block text-sm font-medium text-gray-700">Strategy<span class="help-icon" data-modal="wasteDisposal">(?)</span></label>
+                            <select id="wasteDisposal" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <option value="interim">Interim On-site Storage</option>
+                                <option value="vertical">Local Vertical Repository (Geological)</option>
+                                <option value="horizontal">Local Horizontal Repository (Geological)</option>
+                                <option value="embedded">Embedded Matrix Disposal</option>
+                                <option value="foreign">Foreign Reprocessing/Repository</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="economic" class="tab-content hidden py-4 space-y-4">
+                        <div>
+                            <label for="revenueModel" class="block text-sm font-medium text-gray-700 mb-2">Revenue Model<span class="help-icon" data-modal="revenueModel">(?)</span></label>
+                            <select id="revenueModel" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                <option value="market">Wholesale Market (WESM)</option>
+                                <option value="fit">Feed-in Tariff (FIT) / PSA</option>
+                                <option value="cfd">Contract for Difference (CfD)</option>
+                                <option value="auction">Auction</option>
+                            </select>
+                        </div>
+
+                        <div id="market_inputs" class="space-y-4">
+                            <div>
+                                <label for="electricityPrice" class="block text-sm font-medium text-gray-700">Base Electricity Price (₱/MWh)<span class="help-icon" data-modal="electricityPrice">(?)</span></label>
+                                <input type="number" id="electricityPrice" value="5800" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center"><label for="priceEscalation" class="block text-sm font-medium text-gray-700">Price Escalation (%/yr)<span class="help-icon" data-modal="priceEscalation">(?)</span></label></div>
+                                <div class="flex items-center space-x-4"><input type="range" id="priceEscalation" min="0" max="10" step="0.1" value="1.5" class="w-full"><span id="priceEscalationValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">1.5%</span></div>
+                            </div>
+                        </div>
+
+                         <div id="fit_inputs" class="hidden space-y-4 p-4 bg-slate-50 rounded-lg">
+                            <div>
+                                <label for="fitPrice" class="block text-sm font-medium text-gray-700">FIT / PSA Price (₱/MWh)</label>
+                                <input type="number" id="fitPrice" value="6500" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                             <div>
+                                <label for="fitDuration" class="block text-sm font-medium text-gray-700">Contract Duration (Years)</label>
+                                <input type="number" id="fitDuration" value="20" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                         <div id="cfd_inputs" class="hidden space-y-4 p-4 bg-slate-50 rounded-lg">
+                            <div>
+                                <label for="cfdStrikePrice" class="block text-sm font-medium text-gray-700">Strike Price (₱/MWh)</label>
+                                <input type="number" id="cfdStrikePrice" value="6200" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                              <div>
+                                <label for="cfdMarketPrice" class="block text-sm font-medium text-gray-700">Market Reference Price (₱/MWh)</label>
+                                <input type="number" id="cfdMarketPrice" value="5800" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                             <div>
+                                <label for="cfdDuration" class="block text-sm font-medium text-gray-700">Contract Duration (Years)</label>
+                                <input type="number" id="cfdDuration" value="25" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                         <div id="auction_inputs" class="hidden space-y-4 p-4 bg-slate-50 rounded-lg">
+                            <div>
+                                <label for="auctionPrice" class="block text-sm font-medium text-gray-700">Auction Clearing Price (₱/MWh)</label>
+                                <input type="number" id="auctionPrice" value="5500" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                            </div>
+                        </div>
+
+                        <div class="border-t pt-4 space-y-4">
+                             <div>
+                                <div class="flex justify-between items-center"><label for="inflationRate" class="block text-sm font-medium text-gray-700">Cost Inflation (%/yr)<span class="help-icon" data-modal="inflationRate">(?)</span></label></div>
+                                <div class="flex items-center space-x-4"><input type="range" id="inflationRate" min="0" max="10" step="0.1" value="2" class="w-full"><span id="inflationRateValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">2.0%</span></div>
+                            </div>
+                            <div>
+                                <label for="carbonPrice" class="block text-sm font-medium text-gray-700">Carbon Price (₱/ton CO₂)<span class="help-icon" data-modal="carbonPrice">(?)</span></label>
+                                <input type="number" id="carbonPrice" value="870" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                             <div class="border-t pt-4 space-y-2">
+                                 <label for="cogenerationTechnology" class="block text-sm font-medium text-gray-700">Co-generation Technology<span class="help-icon" data-modal="cogenerationTechnology">(?)</span></label>
+                                <select id="cogenerationTechnology" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
+                                    <option value="none">None</option>
+                                    <option value="district_heating">District Heating</option>
+                                    <option value="desalination_med">Desalination (MED)</option>
+                                    <option value="desalination_ro">Desalination (RO)</option>
+                                    <option value="hydrogen_electrolysis">Hydrogen (Electrolysis)</option>
+                                    <option value="industrial_steam">Industrial Steam</option>
+                                </select>
+                                <label for="cogenerationRevenue" class="block text-sm font-medium text-gray-700">Annual Co-generation Revenue (₱M)<span class="help-icon" data-modal="cogenerationRevenue">(?)</span></label>
+                                <input type="number" id="cogenerationRevenue" value="0" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                <h2 class="text-xl font-bold mb-4 text-slate-700">Financial Analysis</h2>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.26-6.75.77m13.5 0c-.317.02-3.21 1.4-6.75 1.4-3.437 0-6.42-1.376-6.75-1.4m13.5 0L12 12.75 5.25 4.97" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">LCOE (₱/MWh)<span class="help-icon" data-modal="lcoe">(?)</span></h3><p id="lcoe" class="text-xl font-bold text-blue-700 mt-1">₱0.00</p></div></div>
+                    <div class="bg-green-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">NPV (₱B)<span class="help-icon" data-modal="npv">(?)</span></h3><p id="npv" class="text-xl font-bold text-green-700 mt-1">₱0 B</p></div></div>
+                    <div class="bg-purple-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-purple-500"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">IRR (%)<span class="help-icon" data-modal="irr">(?)</span></h3><p id="irr" class="text-xl font-bold text-purple-700 mt-1">0.0%</p></div></div>
+                    <div class="bg-amber-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-amber-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">Payback (Yrs)<span class="help-icon" data-modal="payback">(?)</span></h3><p id="payback" class="text-xl font-bold text-amber-700 mt-1">N/A</p></div></div>
+                </div>
+
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-700 mb-2">Levelized Cost of Energy Breakdown</h3>
+                        <div class="h-56"><canvas id="costBreakdownChart"></canvas></div>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-semibold text-gray-700 mb-2">Cumulative Cash Flow (Discounted)</h3>
+                        <div class="h-56"><canvas id="cashflowChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="infoModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-lg font-bold text-slate-800">Parameter Information</h3>
+                <button id="closeModal" class="text-2xl font-bold text-slate-500 hover:text-slate-800">&times;</button>
+            </div>
+            <p id="modalText" class="text-sm text-slate-600">Information about the selected parameter will be displayed here.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA AND CONSTANTS ---
+        const DEFAULTS = {
+            deploymentStrategy: 'single', fleetCapexDiscount: 15,
+            reactorType: 'ap1000', capacity: 1117, lifetime: 60, constructionTime: 7,
+            discountRateManual: 8, capacityFactor: 90, inflationRate: 2, decommissioningCost: 15, constructionOverrun: 0, useDecomFundToggle: true,
+            thermalEfficiency: 34, fuelBurnup: 50, fuelSupplier: 'generic', geopoliticalRisk: 0, wasteDisposal: 'interim',
+            turbineSupplier: 'generic', rpvSupplier: 'generic',
+            epcContractor: 'generic', omContractor: 'generic', insuranceProvider: 'generic_pool', 
+            cogenerationTechnology: 'none', cogenerationRevenue: 0,
+            siteLocation: 'bataan',
+            jvPartner: 'none', govtSupport: 'none', ptcValue: 580,
+            debtRatio: 70, costOfEquity: 12, loanProvider: 'comm_bank', taxRate: 25, useWaccToggle: true,
+            revenueModel: 'market', electricityPrice: 5800, priceEscalation: 1.5,
+            fitPrice: 6500, fitDuration: 20,
+            cfdStrikePrice: 6200, cfdMarketPrice: 5800, cfdDuration: 25,
+            auctionPrice: 5500,
+            deuteriumCost: 29000000, deuteriumSource: 'foreign',
+        };
+        const usdToPhpRate = 58.0;
+
+        const reactorData = { // Expanded to 32 types
+            bataan: { name: "Refurbish Bataan NPP (PWR)", type: 'large', capexPerMWe: 1612903 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 620, efficiency: 32, burnup: 40 },
+            pwr_gen2: { name: "Pressurized Water Reactor (Gen II)", type: 'large', capexPerMWe: 5500000 * usdToPhpRate, oAndMPerMWe: 140000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
+            bwr_gen2: { name: "Boiling Water Reactor (Gen II)", type: 'large', capexPerMWe: 5700000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
+            candu: { name: "CANDU/PHWR (Gen II)", type: 'large', capexPerMWe: 6000000 * usdToPhpRate, oAndMPerMWe: 160000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 8, capacity: 700, efficiency: 31, burnup: 7 },
+            ap1000: { name: "Westinghouse AP1000 (PWR)", type: 'large', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1117, efficiency: 34, burnup: 50 },
+            epr: { name: "Framatome EPR (PWR)", type: 'large', capexPerMWe: 8500000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 12, capacity: 1650, efficiency: 37, burnup: 60 },
+            vver1200: { name: "Rosatom VVER-1200 (PWR)", type: 'large', capexPerMWe: 5000000 * usdToPhpRate, oAndMPerMWe: 125000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1200, efficiency: 36, burnup: 55 },
+            abwr: { name: "Advanced BWR (ABWR)", type: 'large', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 135000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1350, efficiency: 35, burnup: 50 },
+            apr1400: { name: "KEPCO APR-1400 (PWR)", type: 'large', capexPerMWe: 5200000 * usdToPhpRate, oAndMPerMWe: 128000 * usdToPhpRate, fuelCostPerMWh: 6.8 * usdToPhpRate, constructionTime: 6, capacity: 1400, efficiency: 36, burnup: 55 },
+            hualongone: { name: "CGN Hualong One (PWR)", type: 'large', capexPerMWe: 4500000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 6, capacity: 1150, efficiency: 37, burnup: 50 },
+            nuscale: { name: "NuScale VOYGR (PWR SMR)", type: 'smr', capexPerMWe: 10000000 * usdToPhpRate, oAndMPerMWe: 180000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 77, efficiency: 31, burnup: 50 },
+            bwrx300: { name: "GE-Hitachi BWRX-300 (BWR SMR)", type: 'smr', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 160000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 300, efficiency: 34, burnup: 50 },
+            ismr_jp: { name: "IHI i-SMR (PWR SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 165000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 5, capacity: 300, efficiency: 33, burnup: 50 },
+            rollsroyce_smr: { name: "Rolls-Royce SMR (PWR SMR)", type: 'smr', capexPerMWe: 9000000 * usdToPhpRate, oAndMPerMWe: 170000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 470, efficiency: 35, burnup: 55 },
+            acp100: { name: "CNNC ACP100 'Linglong One' (PWR SMR)", type: 'smr', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 7.8 * usdToPhpRate, constructionTime: 3, capacity: 125, efficiency: 32, burnup: 45 },
+            sfr: { name: "Sodium-Cooled Fast Reactor (SFR)", type: 'gen4', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 110000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 6, capacity: 500, efficiency: 42, burnup: 150 },
+            lfr: { name: "Lead-Cooled Fast Reactor (LFR)", type: 'gen4', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 115000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 6, capacity: 400, efficiency: 43, burnup: 150 },
+            msr: { name: "Molten Salt Reactor (MSR)", type: 'gen4', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 90000 * usdToPhpRate, fuelCostPerMWh: 3.5 * usdToPhpRate, constructionTime: 5, capacity: 500, efficiency: 45, burnup: 100 },
+            vhtr: { name: "Very High-Temp Reactor (VHTR)", type: 'gen4', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 6 * usdToPhpRate, constructionTime: 7, capacity: 600, efficiency: 50, burnup: 120 },
+            scwr: { name: "Supercritical Water Reactor (SCWR)", type: 'gen4', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 6, capacity: 1000, efficiency: 45, burnup: 65 },
+            gsfr: { name: "Gas-Cooled Fast Reactor (GFR)", type: 'gen4', capexPerMWe: 7800000 * usdToPhpRate, oAndMPerMWe: 125000 * usdToPhpRate, fuelCostPerMWh: 5.5 * usdToPhpRate, constructionTime: 7, capacity: 800, efficiency: 48, burnup: 150 },
+            mcfc: { name: "Molten Chloride Fast Reactor (MCFR)", type: 'gen4', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 4.2 * usdToPhpRate, constructionTime: 6, capacity: 600, efficiency: 46, burnup: 180 },
+            oklo_aurora: { name: "Oklo Aurora (Heat Pipe MR)", type: 'micro', capexPerMWe: 15000000 * usdToPhpRate, oAndMPerMWe: 250000 * usdToPhpRate, fuelCostPerMWh: 12 * usdToPhpRate, constructionTime: 2, capacity: 1.5, efficiency: 25, burnup: 100 },
+            westinghouse_evinci: { name: "Westinghouse eVinci (Heat Pipe MR)", type: 'micro', capexPerMWe: 12000000 * usdToPhpRate, oAndMPerMWe: 220000 * usdToPhpRate, fuelCostPerMWh: 11 * usdToPhpRate, constructionTime: 1, capacity: 5, efficiency: 30, burnup: 90 },
+            seaborg: { name: "Seaborg CMSR (MSR Barge)", type: 'advanced', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 3, capacity: 400, efficiency: 44, burnup: 100 },
+            terrapower_natrium: { name: "TerraPower Natrium (SFR + Storage)", type: 'advanced', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 110000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 5, capacity: 345, efficiency: 41, burnup: 160 },
+            thorcon: { name: "ThorCon (MSR Barge)", type: 'advanced', capexPerMWe: 4000000 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 3 * usdToPhpRate, constructionTime: 3, capacity: 500, efficiency: 46, burnup: 100 }
+        };
+        
+        const fuelSupplierData = { // Expanded to 31 options
+            generic: { surcharge: 0.00 }, rosatom_tvel: { surcharge: -0.10 }, orano: { surcharge: 0.02 }, cgn_cnnc: { surcharge: -0.03 }, kepco: { surcharge: 0.04 }, westinghouse: { surcharge: 0.07 },
+            kazatomprom: { surcharge: -0.05 }, cameco: { surcharge: 0.05 }, navoi: { surcharge: -0.04 }, bhp: { surcharge: 0.03 }, yellowcake: { surcharge: 0.01 }, cg_nuc: { surcharge: -0.02 },
+            paladin: { surcharge: 0.04 }, boss: { surcharge: 0.035 },
+            converdyn: { surcharge: 0.015 }, met_zavod: { surcharge: -0.08 }, urenco: { surcharge: 0.06 }, centrus: { surcharge: 0.065 }, silex: { surcharge: 0.055 },
+            gnf: { surcharge: 0.05 }, framatome_fuel: { surcharge: 0.055 }, msz: { surcharge: -0.07 }
+        };
+
+        const wasteDisposalData = {
+            interim: { oAndM_modifier: 0.02, decom_modifier: 0 },
+            vertical: { oAndM_modifier: 0, decom_modifier: 0.15 },
+            horizontal: { oAndM_modifier: 0, decom_modifier: 0.12 },
+            embedded: { oAndM_modifier: 0, decom_modifier: 0.20 },
+            foreign: { oAndM_modifier: 0.10, decom_modifier: 0.05 }
+        };
+
+        const componentSupplierData = { // Expanded to 32+ options each
+            turbine: {
+                generic: 0,
+                ge_arabelle1700: 0.025, ge_arabelle1000: 0.022, ge_stf_d650: 0.018, ge_stf_a650: 0.015,
+                siemens_sst9000: 0.028, siemens_sst6000: 0.024, siemens_sst5000: 0.02,
+                mhi_tc4f: 0.015, mhi_tc2f: 0.012, mhi_bb4f: 0.01,
+                edf_arabelle1770: 0.026, edf_arabelle1200: 0.023,
+                pm_k1200: -0.005, pm_k1000: -0.008, pm_t1250: -0.01,
+                doosan_apr1400: 0.012, doosan_optimised: 0.01,
+                dongfang_1750mw: -0.015, dongfang_1200mw: -0.018, dongfang_1000mw: -0.02,
+                harbin_1500mw: -0.016, harbin_1000mw: -0.019,
+                bhel_700phwr: 0.005, bhel_500phwr: 0.003,
+                toshiba_abwr: 0.014, toshiba_large: 0.016
+            },
+            rpv: {
+                generic: 0,
+                jsw_epr: 0.035, jsw_ap1000: 0.032, jsw_abwr: 0.03, jsw_smr: 0.028,
+                doosan_apr1400: 0.015, doosan_ap1000: 0.012, doosan_smr: 0.01,
+                framatome_epr: 0.028, framatome_pwr: 0.025,
+                aem_vver1200: -0.01, aem_vvertoi: -0.012, aem_smr: -0.015,
+                cfhi_hualong: -0.02, cfhi_ap1000: -0.022, cfhi_gen3: -0.025,
+                shanghai_hualong: -0.018, shanghai_ap1000: -0.02,
+                lt_phwr700: 0.005, lt_pwr: 0.008,
+                creusot_epr2: 0.026, creusot_pwr_n4: 0.024,
+                omz_vver1000: -0.009, omz_vver440: -0.011,
+                bwxt_smr: 0.022, bwxt_mreactors: 0.025
+            }
+        };
+
+        const epcContractorData = {
+            generic: { capexModifier: 0, riskModifier: 0 },
+            bechtel: { capexModifier: 0.08, riskModifier: 5 },
+            fluor: { capexModifier: 0.07, riskModifier: 10 },
+            kepco_enc: { capexModifier: 0.02, riskModifier: 0 },
+            rosatom_ase: { capexModifier: -0.08, riskModifier: 15 },
+            cgn: { capexModifier: -0.12, riskModifier: 5 },
+            cnnc: { capexModifier: -0.10, riskModifier: 8 },
+            lt_construction: { capexModifier: 0.00, riskModifier: 12 }
+        };
+
+        const oAndMContractorData = {
+            generic: { oAndMModifier: 0 },
+            framatome_om: { oAndMModifier: 0.08 },
+            westinghouse_om: { oAndMModifier: 0.10 },
+            ge_om: { oAndMModifier: 0.07 },
+            kepco_kps: { oAndMModifier: 0.02 },
+            rosenergoatom: { oAndMModifier: -0.05 },
+            day_zimmermann: { oAndMModifier: 0.05 }
+        };
+        
+        const loanProviderData = {
+            comm_bank: { interestRate: 6.5 }, us_exim: { interestRate: 4.0 }, jbic: { interestRate: 3.5 },
+            kexim: { interestRate: 3.8 }, bpi_france: { interestRate: 4.2 }, sberbank: { interestRate: 5.5 },
+            china_dev_bank: { interestRate: 4.5 }, world_bank: { interestRate: 5.0 }
+        };
+
+        const jvPartnerData = {
+            none: { coeModifier: 0 },
+            aboitiz: { coeModifier: -1.0 },
+            meralco: { coeModifier: -0.8 },
+            smc: { coeModifier: 0.5 }
+        };
+
+        const cogenerationData = {
+            none: { name: "None", revenuePerMWe: 0 },
+            district_heating: { name: "District Heating", revenuePerMWe: 5000000 },
+            desalination_med: { name: "Desalination (MED)", revenuePerMWe: 7000000 },
+            desalination_ro: { name: "Desalination (RO)", revenuePerMWe: 4000000 },
+            hydrogen_electrolysis: { name: "Hydrogen (Electrolysis)", revenuePerMWe: 10000000 },
+            industrial_steam: { name: "Industrial Steam", revenuePerMWe: 8000000 }
+        };
+
+        const insuranceData = {
+            generic_pool: { premiumPerMWe: 160000 },
+            ani: { premiumPerMWe: 150000 },
+            emani: { premiumPerMWe: 180000 },
+            cnip: { premiumPerMWe: 120000 },
+            nri: { premiumPerMWe: 170000 },
+            jaeip: { premiumPerMWe: 190000 },
+            rnip: { premiumPerMWe: 130000 },
+            kaeip: { premiumPerMWe: 140000 },
+            swiss_pool: { premiumPerMWe: 200000 },
+            dkvg: { premiumPerMWe: 175000 },
+            spanish_pool: { premiumPerMWe: 165000 }
+        };
+
+        const siteData = {
+            bataan: { name: "Bataan Peninsula", coords: [14.63, 120.45], seismicModifier: 0.05, gridModifier: 0.01, laborModifier: 0.02 },
+            cagayan: { name: "Cagayan North", coords: [18.35, 121.77], seismicModifier: 0.03, gridModifier: 0.05, laborModifier: -0.05 },
+            palawan: { name: "Palawan", coords: [9.75, 118.75], seismicModifier: 0.01, gridModifier: 0.08, laborModifier: -0.02 },
+            cebu: { name: "Cebu", coords: [10.31, 123.89], seismicModifier: 0.06, gridModifier: 0.02, laborModifier: 0.05 },
+            davnor: { name: "Davao del Norte", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
+        };
+
+        const modalInfo = {
+            deploymentStrategy: { title: "Deployment Strategy", text: "Choose between building a single large reactor or a fleet of Small Modular Reactors (SMRs) to meet the Department of Energy's 1200MWe target. The SMR fleet option may benefit from economies of scale, reducing capital costs." },
+            fleetCapexDiscount: { title: "Fleet CAPEX Discount (%)", text: "The percentage reduction in capital cost per unit due to serial manufacturing and learning effects when building a fleet of identical SMRs." },
+            reactorType: { title: "Reactor Type", text: "The specific nuclear reactor technology. Different designs have varying costs, efficiency, capacity, and construction times. This is the most critical choice influencing the project's overall profile." },
+            siteLocation: { title: "Site Location", text: "The geographical location of the plant in the Philippines. This choice impacts costs related to seismic resilience, grid connection, and local labor." },
+            discountRate: { title: "Discount Rate (%)", text: "The rate used to convert future cash flows into today's value (present value). It represents the minimum acceptable rate of return for an investment, accounting for risk and the time value of money. A higher rate makes long-term projects less attractive." },
+            constructionOverrun: { title: "Construction Overrun (%)", text: "The percentage by which the final construction cost exceeds the initial budget (CAPEX). This is a major risk for large infrastructure projects, and overruns can severely impact financial viability." },
+            decommissioningFund: { title: "Use Decommissioning Fund", text: "Toggle to model decommissioning costs. When ON, costs are paid into a fund annually during operation (more realistic). When OFF, the cost is treated as a single lump-sum payment at the end of the plant's life." },
+            decommissioningCost: { title: "Decommissioning (% CAPEX)", text: "The estimated cost to safely dismantle the reactor and remediate the site at the end of its life, expressed as a percentage of the initial construction cost. This is a significant future liability." },
+            capacity: { title: "Power Capacity (MWe)", text: "The nominal net electrical output of the power plant, measured in Megawatts electric (MWe). Higher capacity means more electricity generation and revenue, but also higher initial costs." },
+            lifetime: { title: "Plant Lifetime (Years)", text: "The planned operational lifespan of the power plant. Longer lifetimes allow the initial investment to be spread over more years of revenue generation, generally improving financial metrics." },
+            constructionTime: { title: "Construction Time (Years)", text: "The duration from the start of construction to the beginning of commercial operation. Longer construction periods increase financing costs and delay the start of revenue generation." },
+            capacityFactor: { title: "Capacity Factor (%)", text: "The ratio of the plant's actual electricity output over a year to its maximum possible output. A high capacity factor (typically >90% for nuclear) is crucial for economic performance as it maximizes revenue from the fixed investment." },
+            thermalEfficiency: { title: "Thermal Efficiency (%)", text: "The percentage of thermal energy (heat) generated by the reactor that is converted into electrical energy. Higher efficiency means more electricity is produced for the same amount of fuel, reducing fuel costs." },
+            fuelBurnup: { title: "Fuel Burnup (GWd/tU)", text: "A measure of the total energy extracted from a given mass of nuclear fuel, typically in Gigawatt-days per metric ton of Uranium. Higher burnup indicates more efficient fuel use, leading to lower fuel consumption and less waste." },
+            fuelSupplier: { title: "Fuel Cycle Supplier", text: "The company or entity supplying the nuclear fuel. The choice affects fuel cost due to different pricing, technologies, and geopolitical factors. This models the entire fuel cycle, from mining to fabrication." },
+            geopoliticalRisk: { title: "Geopolitical Risk Premium (%)", text: "A surcharge on fuel costs to model the financial impact of global conflicts, sanctions, or other events that disrupt the uranium supply chain." },
+            deuteriumCost: { title: "Deuterium Cost (PHP/1000L)", text: "The cost of heavy water (D2O), used as a moderator and coolant in CANDU/PHWR reactors. This is a significant upfront cost." },
+            deuteriumSource: { title: "Deuterium Source", text: "Whether heavy water is sourced locally or internationally. Foreign sourcing may incur higher transport and logistics costs." },
+            wasteDisposal: { title: "Waste Disposal Strategy", text: "The long-term plan for managing spent nuclear fuel. Options range from simple on-site storage to permanent geological repositories or foreign reprocessing. This choice significantly impacts long-term O&M and/or decommissioning costs." },
+            revenueModel: { title: "Revenue Model", text: "The mechanism for selling electricity. This determines revenue stability and predictability. WESM is the spot market. FIT/PSA/Auction provide fixed prices, while CfD provides a price floor via a 'strike price'." },
+            electricityPrice: { title: "Base Electricity Price (₱/MWh)", text: "The starting price received for each Megawatt-hour of electricity sold to the grid. This is a primary driver of project revenue." },
+            priceEscalation: { title: "Price Escalation (%/yr)", text: "The expected annual percentage increase in the electricity price over the plant's lifetime, independent of general inflation. This models changes in energy market dynamics." },
+            inflationRate: { title: "Cost Inflation (%/yr)", text: "The expected annual percentage increase in the plant's operational costs (O&M) and fuel costs due to general economic inflation." },
+            carbonPrice: { title: "Carbon Price (₱/ton CO₂)", text: "A price placed on carbon dioxide emissions. Since nuclear power is a low-carbon source, it can generate additional revenue from carbon credits by displacing fossil fuel plants (e.g., coal)." },
+            turbineSupplier: { title: "Turbine Generator Supplier", text: "The manufacturer of the steam turbine and electrical generator. This is a critical component, and the choice of supplier can affect both the initial capital cost (CAPEX) and plant efficiency." },
+            rpvSupplier: { title: "Reactor Pressure Vessel (RPV) Supplier", text: "The manufacturer of the reactor pressure vessel, the high-strength steel container for the reactor core. This is a highly specialized, long-lead-time component, and supplier choice impacts the initial capital cost." },
+            epcContractor: { title: "EPC Contractor", text: "The Engineering, Procurement, and Construction firm responsible for the plant's delivery. Their experience and pricing directly impact the initial CAPEX and the risk of construction delays and cost overruns." },
+            omContractor: { title: "O&M Contractor", text: "The firm responsible for the long-term operation and maintenance of the plant. Outsourcing O&M can affect annual costs and plant performance. 'In-house' assumes the plant owner manages O&M directly." },
+            insuranceProvider: { title: "Insurance Provider", text: "Nuclear power plants require specialized liability insurance. The choice of insurance pool affects the annual premium, which is a component of the O&M cost." },
+            cogenerationTechnology: { title: "Co-generation Technology", text: "The process of using 'waste' heat from the reactor for applications other than electricity generation. This creates additional revenue streams. Selecting a technology will auto-populate the revenue field below, which can be manually overridden." },
+            cogenerationRevenue: { title: "Co-generation Revenue", text: "Annual revenue from non-electricity products, such as industrial steam, district heating, desalinated water, or hydrogen. This provides an additional income stream, improving the plant's business case." },
+            lcoe: { title: "Levelized Cost of Energy (LCOE)", text: "The average revenue per unit of electricity generated that would be required to recover the costs of building and operating a generating plant during an assumed financial life. It is the best measure for comparing the cost of different generation technologies." },
+            npv: { title: "Net Present Value (NPV)", text: "The difference between the present value of cash inflows and the present value of cash outflows over a period of time. A positive NPV indicates that the projected earnings generated by a project (in present pesos) exceeds the anticipated costs. A positive NPV is desirable." },
+            irr: { title: "Internal Rate of Return (IRR)", text: "The discount rate that makes the Net Present Value (NPV) of all cash flows from a particular project equal to zero. If the IRR of a project exceeds its required rate of return (the Discount Rate), that project is desirable." },
+            payback: { title: "Discounted Payback Period", text: "The number of years it takes for a project to recover its initial investment, taking into account the time value of money. It shows how long it takes for the discounted revenues to equal the initial cost." },
+            waccToggle: { title: "Use WACC", text: "Toggle to use the Weighted Average Cost of Capital (WACC) as the discount rate for the project. WACC provides a more realistic discount rate by blending the cost of debt and equity based on the project's financing structure." },
+            jvPartner: { title: "Joint Venture Partner", text: "A local partner in the project. A strong local JV partner can de-risk the project politically and financially, which can lower the required rate of return for equity investors (Cost of Equity)." },
+            govtSupport: { title: "Government Support", text: "Financial incentives provided by the government. Loan Guarantees reduce the cost of debt, making financing cheaper. Production Tax Credits (PTC) add a direct bonus to revenue for each MWh sold." },
+            debtRatio: { title: "Debt Ratio (%)", text: "The proportion of the project's initial investment that is financed through debt (loans). The remainder is financed by equity (investors' capital). A typical ratio for infrastructure is 70-80%." },
+            costOfEquity: { title: "Cost of Equity (%)", text: "The return that equity investors require on their investment in the project. This is typically higher than the cost of debt because investors bear more risk. This value can be influenced by a JV partner." },
+            loanProvider: { title: "Loan Provider (Cost of Debt)", text: "The source of the project's debt financing. Government Export-Import (EXIM) banks often provide lower interest rates than commercial banks to promote their domestic nuclear industry." },
+            taxRate: { title: "Corporate Tax Rate (%)", text: "The tax rate applied to the project's profits. Interest payments on debt are typically tax-deductible, creating a 'tax shield' that reduces the effective cost of debt." }
+        };
+
+        // --- DOM ELEMENT REFERENCES ---
+        const elements = {
+            deploymentStrategy: document.getElementById('deploymentStrategy'), smrFleetOptions: document.getElementById('smrFleetOptions'), smrFleetSummary: document.getElementById('smrFleetSummary'), fleetCapexDiscount: document.getElementById('fleetCapexDiscount'), fleetCapexDiscountValue: document.getElementById('fleetCapexDiscountValue'),
+            reactorType: document.getElementById('reactorType'), capacity: document.getElementById('capacity'), lifetime: document.getElementById('lifetime'), constructionTime: document.getElementById('constructionTime'), discountRateManual: document.getElementById('discountRateManual'), capacityFactor: document.getElementById('capacityFactor'), inflationRate: document.getElementById('inflationRate'), decommissioningCost: document.getElementById('decommissioningCost'), useDecomFundToggle: document.getElementById('useDecomFundToggle'), decomLumpSum: document.getElementById('decomLumpSum'), constructionOverrun: document.getElementById('constructionOverrun'), thermalEfficiency: document.getElementById('thermalEfficiency'), fuelBurnup: document.getElementById('fuelBurnup'), fuelSupplier: document.getElementById('fuelSupplier'), geopoliticalRisk: document.getElementById('geopoliticalRisk'), geopoliticalRiskValue: document.getElementById('geopoliticalRiskValue'), wasteDisposal: document.getElementById('wasteDisposal'), deuteriumSection: document.getElementById('deuteriumSection'), deuteriumCost: document.getElementById('deuteriumCost'), deuteriumSource: document.getElementById('deuteriumSource'),
+            revenueModel: document.getElementById('revenueModel'), market_inputs: document.getElementById('market_inputs'), fit_inputs: document.getElementById('fit_inputs'), cfd_inputs: document.getElementById('cfd_inputs'), auction_inputs: document.getElementById('auction_inputs'),
+            electricityPrice: document.getElementById('electricityPrice'), priceEscalation: document.getElementById('priceEscalation'), priceEscalationValue: document.getElementById('priceEscalationValue'),
+            fitPrice: document.getElementById('fitPrice'), fitDuration: document.getElementById('fitDuration'),
+            cfdStrikePrice: document.getElementById('cfdStrikePrice'), cfdMarketPrice: document.getElementById('cfdMarketPrice'), cfdDuration: document.getElementById('cfdDuration'),
+            auctionPrice: document.getElementById('auctionPrice'),
+            carbonPrice: document.getElementById('carbonPrice'), resetButton: document.getElementById('resetButton'), turbineSupplier: document.getElementById('turbineSupplier'), rpvSupplier: document.getElementById('rpvSupplier'),
+            epcContractor: document.getElementById('epcContractor'), omContractor: document.getElementById('omContractor'), insuranceProvider: document.getElementById('insuranceProvider'), cogenerationTechnology: document.getElementById('cogenerationTechnology'), cogenerationRevenue: document.getElementById('cogenerationRevenue'),
+            siteLocation: document.getElementById('siteLocation'),
+            jvPartner: document.getElementById('jvPartner'), govtSupport: document.getElementById('govtSupport'), ptcValue: document.getElementById('ptcValue'), ptc_input: document.getElementById('ptc_input'),
+            debtRatio: document.getElementById('debtRatio'), costOfEquity: document.getElementById('costOfEquity'), loanProvider: document.getElementById('loanProvider'), taxRate: document.getElementById('taxRate'), useWaccToggle: document.getElementById('useWaccToggle'),
+            waccCalculator: document.getElementById('waccCalculator'), manualDiscountRate: document.getElementById('manualDiscountRate'), waccValue: document.getElementById('waccValue'),
+            capacityValue: document.getElementById('capacityValue'), lifetimeValue: document.getElementById('lifetimeValue'), constructionTimeValue: document.getElementById('constructionTimeValue'), discountRateValueManual: document.getElementById('discountRateValueManual'),
+            debtRatioValue: document.getElementById('debtRatioValue'), costOfEquityValue: document.getElementById('costOfEquityValue'),
+            capacityFactorValue: document.getElementById('capacityFactorValue'), inflationRateValue: document.getElementById('inflationRateValue'), decommissioningCostValue: document.getElementById('decommissioningCostValue'), constructionOverrunValue: document.getElementById('constructionOverrunValue'), thermalEfficiencyValue: document.getElementById('thermalEfficiencyValue'), fuelBurnupValue: document.getElementById('fuelBurnupValue'), 
+            lcoe: document.getElementById('lcoe'), npv: document.getElementById('npv'), irr: document.getElementById('irr'), payback: document.getElementById('payback')
+        };
+        
+        let costChart, cashflowChart, map;
+        let state = {};
+
+        // --- CALCULATION LOGIC ---
+
+        function calculateWACC(s) {
+            const E_V = 1 - (s.debtRatio / 100); 
+            const D_V = s.debtRatio / 100;       
+            const jvModifier = jvPartnerData[s.jvPartner].coeModifier;
+            const Re = (s.costOfEquity + jvModifier) / 100;     
+            let Rd = loanProviderData[s.loanProvider].interestRate / 100;
+            if (s.govtSupport === 'loan_guarantee') {
+                Rd *= 0.7; // Assume 30% reduction in interest rate
+            }
+            const Tc = s.taxRate / 100;          
+
+            const wacc = (E_V * Re) + (D_V * Rd * (1 - Tc));
+            return wacc * 100; 
+        }
+        
+        function calculateBaseParameters(s) {
+            const data = reactorData[s.reactorType];
+            const fuelSurcharge = fuelSupplierData[s.fuelSupplier]?.surcharge ?? 0;
+            const geoRiskSurcharge = s.geopoliticalRisk / 100;
+            const turbineModifier = componentSupplierData.turbine[s.turbineSupplier];
+            const rpvModifier = componentSupplierData.rpv[s.rpvSupplier];
+            const epc = epcContractorData[s.epcContractor];
+            const omModifier = oAndMContractorData[s.omContractor].oAndMModifier;
+            const site = siteData[s.siteLocation];
+            const waste = wasteDisposalData[s.wasteDisposal];
+            
+            const currentCapacity = s.deploymentStrategy === 'fleet' ? 1200 : s.capacity;
+
+            const efficiencyModifier = 0.33 / (s.thermalEfficiency / 100);
+            const burnupModifier = 45 / s.fuelBurnup;
+            const fuelCostModifier = efficiencyModifier * burnupModifier * (1 + fuelSurcharge + geoRiskSurcharge);
+
+            let initialInvestment = data.capexPerMWe * currentCapacity;
+            if (s.deploymentStrategy === 'fleet') {
+                initialInvestment *= (1 - s.fleetCapexDiscount / 100);
+            }
+            initialInvestment *= (1 + turbineModifier + rpvModifier + epc.capexModifier + site.seismicModifier + site.gridModifier);
+            const totalOverrun = (s.constructionOverrun + epc.riskModifier) / 100;
+            initialInvestment *= (1 + totalOverrun);
+            
+            // Add Deuterium cost for CANDU
+            if (s.reactorType === 'candu') {
+                // Assume 0.8 tonnes of D2O per MWe
+                const d2oAmount = 0.8 * currentCapacity * 1000; // in Liters
+                let d2oCost = s.deuteriumCost * (d2oAmount / 1000);
+                if(s.deuteriumSource === 'foreign') d2oCost *= 1.15; // 15% surcharge for foreign
+                initialInvestment += d2oCost;
+            }
+
+            const annualGeneration = currentCapacity * 24 * 365 * (s.capacityFactor / 100);
+            let baseOAndM = data.oAndMPerMWe * currentCapacity * (1 + omModifier + site.laborModifier + waste.oAndM_modifier);
+            const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * currentCapacity;
+            baseOAndM += annualInsurance;
+
+            const totalDecomCost = initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
+            const annualDecomFundPayment = s.useDecomFundToggle ? totalDecomCost / s.lifetime : 0;
+            baseOAndM += annualDecomFundPayment;
+
+            return {
+                initialInvestment,
+                annualConstructionCost: initialInvestment / s.constructionTime,
+                annualOAndM: baseOAndM,
+                annualGeneration,
+                baseAnnualFuelCost: data.fuelCostPerMWh * annualGeneration * fuelCostModifier,
+                decommissioningCost: s.useDecomFundToggle ? 0 : totalDecomCost,
+                annualCarbonRevenue: annualGeneration * 0.9 * s.carbonPrice, // Assuming displaces coal at 0.9 tCO2/MWh
+                annualCogenerationRevenue: s.cogenerationRevenue * 1e6, // Convert from millions
+                ptcBonus: (s.govtSupport === 'ptc') ? s.ptcValue : 0
+            };
+        }
+
+        function calculateLifetimeCashflows(s, base) {
+            let cashflows = Array(s.constructionTime).fill(-base.annualConstructionCost);
+            
+            for (let i = 1; i <= s.lifetime; i++) {
+                const costInflation = Math.pow(1 + (s.inflationRate / 100), i - 1);
+                let revenueForYear = 0;
+                
+                switch(s.revenueModel) {
+                    case 'market':
+                         const priceInflation = Math.pow(1 + (s.priceEscalation / 100), i - 1);
+                         revenueForYear = (s.electricityPrice + base.ptcBonus) * priceInflation * base.annualGeneration;
+                         break;
+                    case 'fit':
+                        if (i <= s.fitDuration) {
+                            revenueForYear = (s.fitPrice + base.ptcBonus) * base.annualGeneration;
+                        } else {
+                            // Reverts to market price after FIT period, assuming it starts from base and escalates from year of expiry
+                            const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - s.fitDuration);
+                            revenueForYear = (s.electricityPrice * marketPriceInflation + base.ptcBonus) * base.annualGeneration;
+                        }
+                        break;
+                     case 'cfd':
+                        if (i <= s.cfdDuration) {
+                            const payment = (s.cfdStrikePrice - s.cfdMarketPrice) * base.annualGeneration;
+                            revenueForYear = (s.cfdMarketPrice + base.ptcBonus) * base.annualGeneration + payment;
+                        } else {
+                            const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - s.cfdDuration);
+                            revenueForYear = (s.electricityPrice * marketPriceInflation + base.ptcBonus) * base.annualGeneration;
+                        }
+                        break;
+                    case 'auction':
+                        // Auction price is typically fixed for the lifetime
+                        revenueForYear = (s.auctionPrice + base.ptcBonus) * base.annualGeneration;
+                        break;
+                }
+                
+                const totalAnnualRevenue = revenueForYear + (base.annualCarbonRevenue * costInflation) + (base.annualCogenerationRevenue * costInflation);
+                const inflatedOAndM = base.annualOAndM * costInflation;
+                const inflatedFuelCost = base.baseAnnualFuelCost * costInflation;
+                cashflows.push(totalAnnualRevenue - inflatedOAndM - inflatedFuelCost);
+            }
+            if (!s.useDecomFundToggle) {
+                cashflows.push(-base.decommissioningCost);
+            }
+            return cashflows;
+        }
+
+        function calculateFinancialMetrics(cashflows, s, base) {
+            const discountRate = (s.useWaccToggle ? calculateWACC(s) : s.discountRateManual) / 100;
+            
+            const calculateNPV = (rate) => cashflows.reduce((acc, cf, i) => acc + cf / Math.pow(1 + rate, i + 1), 0);
+            const npv = calculateNPV(discountRate);
+
+            let irr = "N/A";
+            if (calculateNPV(0) > 0) { // Only calculate if project is profitable at 0 discount
+                let lowRate = 0.0, highRate = 1.0;
+                for (let i = 0; i < 50; i++) {
+                    let midRate = (highRate + lowRate) / 2;
+                    if (calculateNPV(midRate) > 0) lowRate = midRate; else highRate = midRate;
+                }
+                irr = (lowRate * 100).toFixed(1) + "%";
+            }
+
+            let cumulativeDiscountedCF = 0, lastCumulativeCF = 0, paybackPeriod = "N/A";
+             for (let i = 0; i < cashflows.length; i++) {
+                lastCumulativeCF = cumulativeDiscountedCF;
+                const discountedCF = cashflows[i] / Math.pow(1 + discountRate, i + 1);
+                cumulativeDiscountedCF += discountedCF;
+                if (cumulativeDiscountedCF >= 0 && i >= s.constructionTime) {
+                    const fullYears = i + 1 - s.constructionTime;
+                    const fraction = discountedCF > 0 ? Math.abs(lastCumulativeCF) / discountedCF : 0;
+                    paybackPeriod = (fullYears -1 + fraction).toFixed(1) + " Yrs";
+                    break;
+                }
+            }
+            
+            let totalDiscountedGeneration = 0;
+            let discountedCapex = 0, discountedOAndM = 0, discountedFuel = 0, discountedDecommissioning = 0;
+            cashflows.forEach((cf, i) => {
+                const year = i + 1, discountFactor = Math.pow(1 + discountRate, year);
+                if (year <= s.constructionTime) {
+                    discountedCapex += -cf / discountFactor;
+                } else if (year <= s.constructionTime + s.lifetime) {
+                    const opYear = year - s.constructionTime, costInflation = Math.pow(1 + (s.inflationRate / 100), opYear - 1);
+                    const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * (s.deploymentStrategy === 'fleet' ? 1200 : s.capacity);
+                    let currentOAndM = base.annualOAndM - annualInsurance;
+                     if (s.useDecomFundToggle) {
+                        currentOAndM -= (base.initialInvestment * (s.decommissioningCost / 100) * (1 + wasteDisposalData[s.wasteDisposal].decom_modifier)) / s.lifetime;
+                    }
+                    discountedOAndM += (currentOAndM * costInflation + annualInsurance) / discountFactor;
+                    discountedFuel += (base.baseAnnualFuelCost * costInflation) / discountFactor;
+                    totalDiscountedGeneration += base.annualGeneration / discountFactor;
+                }
+            });
+            
+            if (s.useDecomFundToggle) {
+                 const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + wasteDisposalData[s.wasteDisposal].decom_modifier);
+                const annualDecomPayment = totalDecomCost / s.lifetime;
+                for (let i = 1; i <= s.lifetime; i++) {
+                    discountedDecommissioning += annualDecomPayment / Math.pow(1 + discountRate, s.constructionTime + i);
+                }
+            } else {
+                 if (cashflows.length > s.constructionTime + s.lifetime) {
+                    discountedDecommissioning = -cashflows[cashflows.length - 1] / Math.pow(1 + discountRate, cashflows.length);
+                 }
+            }
+
+            const lcoe = totalDiscountedGeneration > 0 ? (discountedCapex + discountedOAndM + discountedFuel + discountedDecommissioning) / totalDiscountedGeneration : 0;
+
+            return {
+                lcoe, npv, irr, payback: paybackPeriod,
+                lcoeBreakdown: {
+                    capex: totalDiscountedGeneration > 0 ? discountedCapex / totalDiscountedGeneration : 0, 
+                    oandm: totalDiscountedGeneration > 0 ? discountedOAndM / totalDiscountedGeneration : 0,
+                    fuel: totalDiscountedGeneration > 0 ? discountedFuel / totalDiscountedGeneration : 0, 
+                    decommissioning: totalDiscountedGeneration > 0 ? discountedDecommissioning / totalDiscountedGeneration : 0
+                }
+            };
+        }
+
+        // --- UI AND EVENT HANDLING ---
+
+        function runSimulation() {
+            readInputsToState();
+            const baseParams = calculateBaseParameters(state);
+            const cashflows = calculateLifetimeCashflows(state, baseParams);
+            const metrics = calculateFinancialMetrics(cashflows, state, baseParams);
+            updateUIDisplays(metrics, cashflows);
+        }
+        
+        function readInputsToState() {
+            for (const key in elements) {
+                if (elements[key] && elements[key].tagName) {
+                    if (elements[key].type === 'checkbox') {
+                         state[key] = elements[key].checked;
+                    } else {
+                        state[key] = (elements[key].type === 'number' || elements[key].type === 'range') ? Number(elements[key].value) : elements[key].value;
+                    }
+                }
+            }
+        }
+        
+        function updateUIDisplays(metrics, cashflows) {
+            const effectiveDiscountRate = state.useWaccToggle ? calculateWACC(state) : state.discountRateManual;
+            elements.waccValue.textContent = calculateWACC(state).toFixed(2) + '%';
+            
+            elements.lcoe.textContent = isFinite(metrics.lcoe) ? `₱${metrics.lcoe.toFixed(2)}` : 'N/A';
+            elements.npv.textContent = `₱${(metrics.npv / 1e9).toFixed(2)} B`;
+            elements.npv.style.color = metrics.npv >= 0 ? '#16a34a' : '#dc2626';
+            elements.irr.textContent = metrics.irr;
+            elements.irr.style.color = (metrics.irr !== "N/A" && parseFloat(metrics.irr) >= effectiveDiscountRate) ? '#16a34a' : '#dc2626';
+            elements.payback.textContent = metrics.payback;
+
+            const breakdown = metrics.lcoeBreakdown;
+            costChart.data.datasets[0].data = [breakdown.capex, breakdown.oandm, breakdown.fuel, breakdown.decommissioning].map(v => isFinite(v) ? Math.max(0, v).toFixed(2) : 0);
+            costChart.update();
+            
+            let cumulative = 0;
+            const cumulativeFlows = cashflows.map((cf, i) => {
+                cumulative += cf / Math.pow(1 + effectiveDiscountRate / 100, i + 1);
+                return cumulative / 1e9;
+            });
+            cashflowChart.data.labels = Array.from({ length: cashflows.length }, (_, i) => `Y${i + 1}`);
+            cashflowChart.data.datasets[0].data = cumulativeFlows;
+            cashflowChart.update();
+        }
+
+        function setupEventListeners() {
+            Object.values(elements).forEach(el => {
+                if (el && (el.tagName === 'INPUT' || el.tagName === 'SELECT')) {
+                    el.addEventListener('input', runSimulation);
+                }
+            });
+
+            elements.reactorType.addEventListener('change', (e) => {
+                setDefaultsForReactor(e.target.value);
+                runSimulation();
+            });
+            
+             elements.deploymentStrategy.addEventListener('change', (e) => {
+                const isFleet = e.target.value === 'fleet';
+                elements.smrFleetOptions.style.display = isFleet ? 'block' : 'none';
+                elements.capacity.disabled = isFleet;
+                populateReactorTypes(isFleet);
+                
+                // If switching to fleet, select the first SMR automatically
+                if (isFleet) {
+                    const firstSMR = Object.keys(reactorData).find(k => reactorData[k].type === 'smr');
+                    elements.reactorType.value = firstSMR;
+                } else {
+                     elements.reactorType.value = 'ap1000'; // Default large reactor
+                }
+                setDefaultsForReactor(elements.reactorType.value);
+                runSimulation();
+            });
+
+            elements.revenueModel.addEventListener('change', (e) => {
+                ['market_inputs', 'fit_inputs', 'cfd_inputs', 'auction_inputs'].forEach(id => {
+                    document.getElementById(id).style.display = 'none';
+                });
+                document.getElementById(e.target.value + '_inputs').style.display = 'block';
+                runSimulation();
+            });
+            
+            elements.cogenerationTechnology.addEventListener('change', (e) => {
+                const tech = e.target.value;
+                const revenuePerMWe = cogenerationData[tech].revenuePerMWe;
+                const capacity = state.deploymentStrategy === 'fleet' ? 1200 : state.capacity;
+                const estimatedRevenue = (revenuePerMWe * capacity) / 1e6; // in millions
+                elements.cogenerationRevenue.value = estimatedRevenue.toFixed(0);
+                runSimulation();
+            });
+             elements.capacity.addEventListener('input', () => { // Recalculate cogen revenue if capacity changes
+                const tech = elements.cogenerationTechnology.value;
+                 if(tech !== 'none') {
+                    const revenuePerMWe = cogenerationData[tech].revenuePerMWe;
+                    const estimatedRevenue = (revenuePerMWe * Number(elements.capacity.value)) / 1e6; // in millions
+                    elements.cogenerationRevenue.value = estimatedRevenue.toFixed(0);
+                 }
+            });
+
+            elements.govtSupport.addEventListener('change', (e) => {
+                elements.ptc_input.style.display = e.target.value === 'ptc' ? 'block' : 'none';
+                runSimulation();
+            });
+
+            elements.useDecomFundToggle.addEventListener('change', (e) => {
+                elements.decomLumpSum.style.display = e.target.checked ? 'none' : 'block';
+                 runSimulation();
+            });
+
+            elements.siteLocation.addEventListener('change', (e) => {
+                const coords = siteData[e.target.value].coords;
+                map.flyTo(coords, 8);
+                runSimulation();
+            });
+
+            const valueUpdaters = {
+                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`,
+                inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`,
+                fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, geopoliticalRisk: v => `${v}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`
+            };
+            for (const key in valueUpdaters) {
+                if(elements[key]) elements[key].addEventListener('input', e => {
+                    const el = document.getElementById(e.target.id + 'Value') || document.getElementById(e.target.id + 'ValueManual');
+                    if(el) el.textContent = valueUpdaters[key](e.target.value);
+                });
+            }
+
+            elements.resetButton.addEventListener('click', () => {
+                setValues(DEFAULTS);
+                populateReactorTypes(false);
+                setDefaultsForReactor(DEFAULTS.reactorType);
+                runSimulation();
+            });
+            
+            elements.useWaccToggle.addEventListener('change', (e) => {
+                const useWacc = e.target.checked;
+                elements.waccCalculator.style.display = useWacc ? 'block' : 'none';
+                elements.manualDiscountRate.style.display = useWacc ? 'none' : 'block';
+                runSimulation();
+            });
+
+            document.querySelectorAll('.tab-button').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(tab.dataset.tab).classList.remove('hidden');
+                    if (tab.dataset.tab === 'site') {
+                        setTimeout(() => map.invalidateSize(), 1);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.help-icon').forEach(icon => {
+                icon.addEventListener('click', (e) => {
+                    const key = e.target.dataset.modal;
+                    const info = modalInfo[key];
+                    if (info) {
+                        document.getElementById('modalTitle').textContent = info.title;
+                        document.getElementById('modalText').textContent = info.text;
+                        document.getElementById('infoModal').classList.add('visible');
+                    }
+                });
+            });
+            document.getElementById('closeModal').addEventListener('click', () => document.getElementById('infoModal').classList.remove('visible'));
+            document.getElementById('infoModal').addEventListener('click', (e) => {
+                if (e.target.id === 'infoModal') document.getElementById('infoModal').classList.remove('visible');
+            });
+        }
+
+        function setValues(values) {
+            const valueUpdaters = {
+                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`
+            };
+            for (const key in values) {
+                if (elements[key]) {
+                    if (elements[key].type === 'checkbox') {
+                        elements[key].checked = values[key];
+                    } else {
+                        elements[key].value = values[key];
+                    }
+                    const valueElId = key + 'Value';
+                    const valueEl = elements[valueElId] || document.getElementById(valueElId + 'Manual');
+
+                    if (valueEl) {
+                         const updater = valueUpdaters[key];
+                         if(updater) valueEl.textContent = updater(values[key]);
+                    }
+                }
+            }
+             elements.deploymentStrategy.dispatchEvent(new Event('change'));
+             elements.useWaccToggle.dispatchEvent(new Event('change'));
+             elements.useDecomFundToggle.dispatchEvent(new Event('change'));
+             elements.govtSupport.dispatchEvent(new Event('change'));
+             elements.revenueModel.dispatchEvent(new Event('change'));
+        }
+
+        function setDefaultsForReactor(type) {
+            const data = reactorData[type];
+            if (!data) return;
+
+            let newValues = {};
+            if(state.deploymentStrategy === 'fleet') {
+                const units = Math.ceil(1200 / data.capacity);
+                elements.smrFleetSummary.textContent = `${units} units × ${data.capacity} MWe/unit = ${units * data.capacity} MWe Total`;
+                newValues = { constructionTime: data.constructionTime, thermalEfficiency: data.efficiency, fuelBurnup: data.burnup };
+                 elements.capacity.value = 1200; // Keep total capacity at 1200
+                 elements.capacityValue.textContent = '1200 MWe';
+            } else {
+                newValues = { capacity: data.capacity, constructionTime: data.constructionTime, thermalEfficiency: data.efficiency, fuelBurnup: data.burnup };
+            }
+            
+            elements.deuteriumSection.style.display = type === 'candu' ? 'block' : 'none';
+
+            setValues(newValues);
+        }
+
+        function populateReactorTypes(isFleet) {
+            const reactorEl = elements.reactorType;
+            reactorEl.innerHTML = ''; // Clear existing options
+
+            const categories = {
+                large: 'Legacy & Gen II/III+',
+                smr: 'Small Modular Reactors (SMRs)',
+                gen4: 'Gen IV (Future Concepts)',
+                micro: 'Microreactors',
+                advanced: 'Advanced Concepts'
+            };
+
+            const reactorGroups = {};
+            for (const id in reactorData) {
+                const reactor = reactorData[id];
+                if (!reactorGroups[reactor.type]) {
+                    reactorGroups[reactor.type] = [];
+                }
+                reactorGroups[reactor.type].push({ id, name: reactor.name });
+            }
+
+            for (const type in reactorGroups) {
+                 if(isFleet && type !== 'smr') continue; // Only show SMRs in fleet mode
+                 if(!isFleet && type === 'smr') continue; // Hide SMRs in single mode for clarity
+
+                const optgroup = document.createElement('optgroup');
+                optgroup.label = categories[type] || 'Other';
+                reactorGroups[type].forEach(reactor => {
+                    const option = document.createElement('option');
+                    option.value = reactor.id;
+                    option.textContent = reactor.name;
+                    optgroup.appendChild(option);
+                });
+                reactorEl.appendChild(optgroup);
+            }
+        }
+
+        function initializeCharts() {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            Chart.defaults.color = '#64748b';
+            
+            const costCtx = document.getElementById('costBreakdownChart').getContext('2d');
+            costChart = new Chart(costCtx, {
+                type: 'doughnut', data: { labels: ['CAPEX', 'O&M', 'Fuel', 'Decommissioning'], datasets: [{ data: [], backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#f43f5e'], hoverOffset: 4, borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15 } } } }
+            });
+
+            const cashflowCtx = document.getElementById('cashflowChart').getContext('2d');
+            cashflowChart = new Chart(cashflowCtx, {
+                type: 'line', data: { labels: [], datasets: [{ label: 'Cumulative Discounted Cash Flow (₱B)', data: [], borderColor: '#4f46e5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3, pointRadius: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: v => `₱${v}B` }, grid: { color: '#e2e8f0' } }, x: { grid: { display: false } } }, plugins: { legend: { display: false }, annotation: { annotations: { zeroLine: { type: 'line', yMin: 0, yMax: 0, borderColor: '#94a3b8', borderWidth: 1, borderDash: [5, 5] } } } } }
+            });
+        }
+        
+        function initializeMap() {
+            map = L.map('map').setView([12.8797, 121.7740], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+
+            for (const key in siteData) {
+                const site = siteData[key];
+                L.marker(site.coords).addTo(map).bindPopup(`<b>${site.name}</b>`);
+            }
+        }
+
+        // --- INITIALIZATION ---
+        window.onload = () => {
+            initializeCharts();
+            initializeMap();
+            populateReactorTypes(false); // Initial population for single plants
+            setupEventListeners();
+            setValues(DEFAULTS);
+            setDefaultsForReactor(DEFAULTS.reactorType);
+            runSimulation();
+        };
+    </script>
+</body>
+</html>
