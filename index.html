@@ -574,6 +574,7 @@
             bwrx300: { name: "GE-Hitachi BWRX-300 (BWR SMR)", type: 'smr', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 160000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 300, efficiency: 34, burnup: 50 },
             ismr_jp: { name: "IHI i-SMR (PWR SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 165000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 5, capacity: 300, efficiency: 33, burnup: 50 },
             rollsroyce_smr: { name: "Rolls-Royce SMR (PWR SMR)", type: 'smr', capexPerMWe: 9000000 * usdToPhpRate, oAndMPerMWe: 170000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 470, efficiency: 35, burnup: 55 },
+            ap300: { name: "Westinghouse AP300 (SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 170000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 3, capacity: 300, efficiency: 33, burnup: 50 },
             acp100: { name: "CNNC ACP100 'Linglong One' (PWR SMR)", type: 'smr', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 7.8 * usdToPhpRate, constructionTime: 3, capacity: 125, efficiency: 32, burnup: 45 },
             sfr: { name: "Sodium-Cooled Fast Reactor (SFR)", type: 'gen4', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 110000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 6, capacity: 500, efficiency: 42, burnup: 150 },
             lfr: { name: "Lead-Cooled Fast Reactor (LFR)", type: 'gen4', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 115000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 6, capacity: 400, efficiency: 43, burnup: 150 },
@@ -1202,8 +1203,12 @@
             }
 
             for (const type in reactorGroups) {
-                 if(isFleet && type !== 'smr') continue; // Only show SMRs in fleet mode
-                 if(!isFleet && type === 'smr') continue; // Hide SMRs in single mode for clarity
+                // Fleet mode should ONLY show SMRs
+                if (isFleet && type !== 'smr') continue;
+
+                // Single Plant mode should show large-scale reactors, not SMRs or Microreactors
+                if (!isFleet && (type === 'smr' || type === 'micro')) continue;
+
 
                 const optgroup = document.createElement('optgroup');
                 optgroup.label = categories[type] || 'Other';
