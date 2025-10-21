@@ -468,7 +468,7 @@
                         </div>
                     </div>
 
-                    <div id="economic" class="tab-content hidden py-4 space-y-4">
+                    <div id="economic" class="tab-content py-4 space-y-4">
                         <div>
                             <label for="revenueModel" class="block text-sm font-medium text-gray-700 mb-2">Revenue Model<span class="help-icon" data-modal="revenueModel">(?)</span></label>
                             <select id="revenueModel" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
@@ -479,7 +479,7 @@
                             </select>
                         </div>
 
-                        <div id="market_inputs" class="space-y-4">
+                        <div id="market_inputs" class="hidden space-y-4">
                             <div>
                                 <label for="electricityPrice" class="block text-sm font-medium text-gray-700">Base Electricity Price (₱/MWh)<span class="help-icon" data-modal="electricityPrice">(?)</span></label>
                                 <input type="number" id="electricityPrice" value="3040" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -490,10 +490,10 @@
                             </div>
                         </div>
 
-                         <div id="fit_inputs" class="hidden space-y-4 p-4 bg-slate-50 rounded-lg">
+                         <div id="fit_inputs" class="space-y-4 p-4 bg-slate-50 rounded-lg">
                             <div>
                                 <label for="fitPrice" class="block text-sm font-medium text-gray-700">FIT / PSA Price (₱/MWh)</label>
-                                <input type="number" id="fitPrice" value="6500" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                                <input type="number" id="fitPrice" value="9500" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
                             </div>
                              <div>
                                 <label for="fitDuration" class="block text-sm font-medium text-gray-700">Contract Duration (Years)</label>
@@ -607,8 +607,8 @@
             siteLocation: 'mariveles',
             jvPartner: 'none', govtSupport: 'none', ptcValue: 580,
             debtRatio: 70, costOfEquity: 12, loanProvider: 'comm_bank', taxRate: 25, useWaccToggle: true,
-            revenueModel: 'market', electricityPrice: 3040, priceEscalation: 1.5,
-            fitPrice: 6500, fitDuration: 20,
+            revenueModel: 'fit', electricityPrice: 3040, priceEscalation: 1.5,
+            fitPrice: 9500, fitDuration: 20,
             cfdStrikePrice: 6200, cfdMarketPrice: 3040, cfdDuration: 25,
             auctionPrice: 5500,
             deuteriumCost: 29000000, deuteriumSource: 'foreign',
@@ -1060,12 +1060,8 @@
                 const opStartYear = s.constructionTime + s.licensingDelay + 1;
                 
                 if (year <= s.constructionTime) {
-                    // Construction outflow (CAPEX)
+                    // Construction outflow (CAPEX spread over construction time)
                     discountedCapex += -cf / discountFactor;
-                    if (waste.capex_trigger && year === 1) {
-                         // Repository CAPEX (treated as a pure CAPEX addition at the start)
-                         discountedCapex += s.repositoryCapex * 1e9 / discountFactor;
-                    }
                 } else if (year >= opStartYear && year <= opStartYear + s.lifetime - 1) {
                     const opYear = year - opStartYear + 1;
                     const costInflation = Math.pow(1 + (s.inflationRate / 100), opYear - 1);
@@ -1073,7 +1069,9 @@
                     let currentOAndM = base.annualOAndM - annualInsurance;
                      if (s.useDecomFundToggle) {
                         const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
-                        currentOAndM -= totalDecomCost / s.lifetime; // Remove the non-inflated decommissioning fund contribution
+                        // The base.annualOAndM already includes the non-inflated annual Decom Fund contribution.
+                        // We need to exclude the fund payment portion from the calculated O&M to avoid double counting if the fund is used.
+                        currentOAndM -= totalDecomCost / s.lifetime;
                     }
                     
                     discountedOAndM += (currentOAndM * costInflation + annualInsurance) / discountFactor;
@@ -1081,6 +1079,7 @@
                     totalDiscountedGeneration += base.annualGeneration / discountFactor;
 
                     if (s.useDecomFundToggle) {
+                        // Decommissioning cost is represented by the discounted value of the annual fund contribution
                         const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
                         const annualDecomPayment = totalDecomCost / s.lifetime;
                         discountedDecommissioning += annualDecomPayment / discountFactor;
@@ -1090,6 +1089,14 @@
                     discountedDecommissioning += -cf / discountFactor;
                 }
             });
+            
+            // Add initial Repository CAPEX to discounted Capex, as it's a fixed upfront cost
+            if (wasteDisposalData[s.wasteDisposal].capex_trigger) {
+                 const firstYearDiscountFactor = Math.pow(1 + discountRate, 1);
+                 discountedCapex += s.repositoryCapex * 1e9 / firstYearDiscountFactor;
+            }
+            
+            // Note: The IDC factor is embedded within the initialInvestment calculation, so it is already included in discountedCapex as part of the total construction outflow.
 
             const lcoe = totalDiscountedGeneration > 0 ? (discountedCapex + discountedOAndM + discountedFuel + discountedDecommissioning) / totalDiscountedGeneration : 0;
 
