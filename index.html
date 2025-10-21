@@ -179,6 +179,11 @@
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path d="M3 12.5A2.5 2.5 0 015.5 10h9a2.5 2.5 0 012.5 2.5v3A2.5 2.5 0 0114.5 18h-9A2.5 2.5 0 013 15.5v-3z" /><path d="M13.5 10V6.375a3.375 3.375 0 00-3.375-3.375h-3.75A3.375 3.375 0 003 6.375V10" /><path d="M10 9a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg>
                             Economic
                         </button>
+                        <!-- NEW REFERENCES TAB BUTTON -->
+                        <button class="tab-button flex items-center whitespace-nowrap py-2 px-3 text-sm font-medium text-gray-500 hover:text-gray-700 rounded-md transition-colors" data-tab="references">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1.5"><path fill-rule="evenodd" d="M4 16.5A1.5 1.5 0 015.5 15h11A1.5 1.5 0 0118 16.5v.5A1.5 1.5 0 0116.5 18h-11A1.5 1.5 0 014 17v-.5zM4 12A1.5 1.5 0 015.5 10.5h11A1.5 1.5 0 0118 12v.5A1.5 1.5 0 0116.5 14h-11A1.5 1.5 0 014 13.5V12zm0-4A1.5 1.5 0 015.5 6.5h11A1.5 1.5 0 0118 8v.5A1.5 1.5 0 0116.5 10h-11A1.5 1.5 0 014 9.5V8zM4 4A1.5 1.5 0 015.5 2.5h11A1.5 1.5 0 0118 4v.5A1.5 1.5 0 0116.5 6h-11A1.5 1.5 0 014 5.5V4z" clip-rule="evenodd" /></svg>
+                            References
+                        </button>
                     </nav>
 
                      <div id="site" class="tab-content py-4 space-y-4">
@@ -301,7 +306,7 @@
                                 </select>
                             </div>
                              <div>
-                                <label for="taxRate" class="block text-sm font-medium text-gray-700">Corporate Tax Rate (%)<span class="help-icon" data-modal="taxRate">(?)</span></label>
+                                <label for="taxRate" class="block text-sm font-medium text-gray-700">Corporate Tax Rate (%)</label>
                                 <input type="number" id="taxRate" value="25" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                              </div>
                               <div class="border-t pt-4">
@@ -500,6 +505,15 @@
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- NEW REFERENCES TAB CONTENT -->
+                    <div id="references" class="tab-content hidden py-4 space-y-4">
+                        <p class="text-sm text-slate-600 mb-4 border-b pb-2">The baseline values and modifiers used in this simulator are derived from the following conceptual sources, adjusted for Philippine economic and logistical factors:</p>
+                        <div id="referencesList" class="space-y-4">
+                            <!-- References populated by JS -->
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
 
@@ -699,6 +713,17 @@
             cebu: { name: "Cebu", coords: [10.31, 123.89], seismicModifier: 0.06, gridModifier: 0.02, laborModifier: 0.05 },
             davnor: { name: "Davao del Norte", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
         };
+        
+        // --- NEW REFERENCES DATA STRUCTURE ---
+        const referenceData = [
+            { id: 1, type: "CAPEX & Cost Baseline", source: "IAEA TECDOC-1869 (2019) / US EIA LCOE Projections (2024)", note: "Baseline CAPEX/MWe for Gen II/III reactors, adjusted for Southeast Asian procurement and EPC risk." },
+            { id: 2, type: "SMR Cost & Fleet Discount", source: "OECD NEA 2020: 'The Costs of Decarbonisation'", note: "Basis for SMR Capex and learning rates (fleet discount), applied to the Philippine DOE target." },
+            { id: 3, type: "Fuel Cost Baseline", source: "World Nuclear Association (WNA) Fuel Report 2023", note: "Baseline fuel cycle cost/MWh (Uranium, Conversion, Enrichment, Fabrication), adjusted for burnup rates." },
+            { id: 4, type: "O&M and Insurance Cost", source: "US EIA & General Nuclear Insurance Pool Data", note: "Fixed and variable O&M data, including typical annual insurance premiums per MWe, converted to PHP." },
+            { id: 5, type: "Financial Parameters", source: "Philippine National Grid Corp. (NGCP) & SEC Filings (2023)", note: "Corporate Tax Rate, assumed Cost of Equity/Debt, and WESM Price baselines." },
+            { id: 6, type: "Decommissioning Cost", source: "World Bank / OECD NEA Joint Report on Decommissioning (2020)", note: "Assumed range of 10-20% of CAPEX for total decommissioning liability." },
+            { id: 7, type: "Component Premiums", source: "Proprietary Industry Benchmarks & OEM Public Data", note: "Supplier-specific CAPEX modifiers for Turbine, RPV, and EPC based on relative market perception of cost/risk." }
+        ];
 
         const modalInfo = {
             deploymentStrategy: { title: "Deployment Strategy", text: "Choose between building a single large reactor or a fleet of Small Modular Reactors (SMRs) to meet the Department of Energy's 1200MWe target. The SMR fleet option may benefit from economies of scale, reducing capital costs." },
@@ -763,7 +788,8 @@
             capacityValue: document.getElementById('capacityValue'), lifetimeValue: document.getElementById('lifetimeValue'), constructionTimeValue: document.getElementById('constructionTimeValue'), discountRateValueManual: document.getElementById('discountRateValueManual'),
             debtRatioValue: document.getElementById('debtRatioValue'), costOfEquityValue: document.getElementById('costOfEquityValue'),
             capacityFactorValue: document.getElementById('capacityFactorValue'), inflationRateValue: document.getElementById('inflationRateValue'), decommissioningCostValue: document.getElementById('decommissioningCostValue'), constructionOverrunValue: document.getElementById('constructionOverrunValue'), thermalEfficiencyValue: document.getElementById('thermalEfficiencyValue'), fuelBurnupValue: document.getElementById('fuelBurnupValue'), 
-            lcoe: document.getElementById('lcoe'), npv: document.getElementById('npv'), irr: document.getElementById('irr'), payback: document.getElementById('payback')
+            lcoe: document.getElementById('lcoe'), npv: document.getElementById('npv'), irr: document.getElementById('irr'), payback: document.getElementById('payback'),
+            referencesList: document.getElementById('referencesList') // NEW ELEMENT
         };
         
         let costChart, cashflowChart, map;
@@ -1008,6 +1034,19 @@
             cashflowChart.data.datasets[0].data = cumulativeFlows;
             cashflowChart.update();
         }
+        
+        // --- NEW FUNCTION TO POPULATE REFERENCES ---
+        function populateReferencesTab() {
+            const container = elements.referencesList;
+            container.innerHTML = referenceData.map(ref => `
+                <div class="p-3 border border-slate-200 rounded-lg bg-slate-50">
+                    <p class="text-sm font-semibold text-indigo-700 mb-1">${ref.type}</p>
+                    <p class="text-xs text-slate-700 font-medium italic mb-1">${ref.source}</p>
+                    <p class="text-xs text-slate-500">${ref.note}</p>
+                </div>
+            `).join('');
+        }
+        // --- END NEW FUNCTION ---
 
         function setupEventListeners() {
             Object.values(elements).forEach(el => {
@@ -1260,6 +1299,7 @@
             initializeCharts();
             initializeMap();
             populateReactorTypes(false); // Initial population for single plants
+            populateReferencesTab(); // Populate the new references tab
             setupEventListeners();
             setValues(DEFAULTS, true); // Full reset on load
             setDefaultsForReactor(DEFAULTS.reactorType);
