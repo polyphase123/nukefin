@@ -1092,7 +1092,7 @@
             }
 
             elements.resetButton.addEventListener('click', () => {
-                setValues(DEFAULTS);
+                setValues(DEFAULTS, true); // Pass true to indicate a full reset
                 populateReactorTypes(false);
                 setDefaultsForReactor(DEFAULTS.reactorType);
                 runSimulation();
@@ -1134,7 +1134,7 @@
             });
         }
 
-        function setValues(values) {
+        function setValues(values, isFullReset = false) {
             const valueUpdaters = {
                 capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`
             };
@@ -1154,11 +1154,14 @@
                     }
                 }
             }
-             elements.deploymentStrategy.dispatchEvent(new Event('change'));
-             elements.useWaccToggle.dispatchEvent(new Event('change'));
-             elements.useDecomFundToggle.dispatchEvent(new Event('change'));
-             elements.govtSupport.dispatchEvent(new Event('change'));
-             elements.revenueModel.dispatchEvent(new Event('change'));
+            // Only trigger these events on a full reset, not on partial updates
+            if (isFullReset) {
+                 elements.deploymentStrategy.dispatchEvent(new Event('change'));
+                 elements.useWaccToggle.dispatchEvent(new Event('change'));
+                 elements.useDecomFundToggle.dispatchEvent(new Event('change'));
+                 elements.govtSupport.dispatchEvent(new Event('change'));
+                 elements.revenueModel.dispatchEvent(new Event('change'));
+            }
         }
 
         function setDefaultsForReactor(type) {
@@ -1258,7 +1261,7 @@
             initializeMap();
             populateReactorTypes(false); // Initial population for single plants
             setupEventListeners();
-            setValues(DEFAULTS);
+            setValues(DEFAULTS, true); // Full reset on load
             setDefaultsForReactor(DEFAULTS.reactorType);
             runSimulation();
         };
