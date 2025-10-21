@@ -120,7 +120,7 @@
             <p class="text-slate-600 mt-2 max-w-2xl mx-auto">An advanced tool to model the financial and engineering viability of nuclear power options for the Philippines.</p>
         </header>
 
-        <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <main class="grid grid-cols-1 lg:col-span-3 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 bg-white p-6 rounded-xl shadow-lg">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-slate-700">Simulation Parameters</h2>
@@ -187,23 +187,38 @@
                     </nav>
 
                      <div id="site" class="tab-content py-4 space-y-4">
+                        <!-- UPDATED SITE LOCATIONS -->
                         <div>
                             <label for="siteLocation" class="block text-sm font-medium text-gray-700">Site Location<span class="help-icon" data-modal="siteLocation">(?)</span></label>
                             <select id="siteLocation" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
-                                <option value="bataan">Bataan Peninsula</option>
-                                <option value="cagayan">Cagayan North</option>
-                                <option value="palawan">Palawan</option>
-                                <option value="cebu">Cebu</option>
-                                <option value="davnor">Davao del Norte</option>
+                                <option value="mariveles">Mariveles, Bataan (Existing BNPP)</option>
+                                <option value="batangas">Batangas City, Batangas</option>
+                                <option value="san_rafael">San Rafael, Bulacan</option>
+                                <option value="labrador">Labrador, Pangasinan</option>
+                                <option value="aroroy">Aroroy, Masbate</option>
+                                <option value="inagawan">Brgy. Inagawan, Palawan</option>
+                                <option value="concepcion">Brgy. Concepcion, Palawan</option>
+                                <option value="cagayan">Aparri, Cagayan (North Luzon)</option>
+                                <option value="cebu">Toledo City, Cebu (Visayas)</option>
+                                <option value="davnor">Davao Gulf Area (Mindanao)</option>
                             </select>
                         </div>
+                        
+                        <!-- NEW FEATURE: SOCIAL/REGULATORY RISK -->
+                        <div>
+                            <div class="flex justify-between items-center"><label for="socialOppositionRisk" class="block text-sm font-medium text-gray-700">Social Opposition/Litigation Risk (%)<span class="help-icon" data-modal="socialOppositionRisk">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="socialOppositionRisk" min="0" max="25" step="1" value="0" class="w-full"><span id="socialOppositionRiskValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0%</span></div>
+                            <p class="text-xs text-slate-500 mt-1">This directly adds to the Construction Overrun risk percentage.</p>
+                        </div>
+
                         <div id="map"></div>
                     </div>
 
                     <div id="financial" class="tab-content hidden py-4 space-y-4">
                         <div>
-                            <div class="flex justify-between items-center"><label for="constructionOverrun" class="block text-sm font-medium text-gray-700">Construction Overrun (%)<span class="help-icon" data-modal="constructionOverrun">(?)</span></label></div>
+                            <div class="flex justify-between items-center"><label for="constructionOverrun" class="block text-sm font-medium text-gray-700">Construction Overrun (Engineering Risk, %)<span class="help-icon" data-modal="constructionOverrun">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="constructionOverrun" min="0" max="100" step="1" value="0" class="w-full"><span id="constructionOverrunValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0%</span></div>
+                            <p class="text-xs text-slate-500 mt-1">Total Risk: <span id="totalConstructionRisk" class="font-semibold">0%</span></p>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm font-medium text-gray-700">Use Decommissioning Fund<span class="help-icon" data-modal="decommissioningFund">(?)</span></span>
@@ -341,6 +356,13 @@
                             <div class="flex justify-between items-center"><label for="lifetime" class="block text-sm font-medium text-gray-700">Plant Lifetime (Years)<span class="help-icon" data-modal="lifetime">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="lifetime" min="20" max="80" value="60" class="w-full"><span id="lifetimeValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">60 Yrs</span></div>
                         </div>
+                        <!-- NEW FEATURE: LICENSING DELAY -->
+                        <div>
+                            <div class="flex justify-between items-center"><label for="licensingDelay" class="block text-sm font-medium text-gray-700">Regulatory/Licensing Delay (Years)<span class="help-icon" data-modal="licensingDelay">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="licensingDelay" min="0" max="10" value="0" class="w-full"><span id="licensingDelayValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0 Yrs</span></div>
+                            <p class="text-xs text-slate-500 mt-1">Delay in commissioning increases financing costs (IDC).</p>
+                        </div>
+                        
                         <div>
                             <div class="flex justify-between items-center"><label for="constructionTime" class="block text-sm font-medium text-gray-700">Construction Time (Years)<span class="help-icon" data-modal="constructionTime">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="constructionTime" min="1" max="15" value="8" class="w-full"><span id="constructionTimeValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">8 Yrs</span></div>
@@ -349,6 +371,14 @@
                             <div class="flex justify-between items-center "><label for="capacityFactor" class="block text-sm font-medium text-gray-700">Capacity Factor (%)<span class="help-icon" data-modal="capacityFactor">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="capacityFactor" min="50" max="100" value="90" class="w-full"><span id="capacityFactorValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">90%</span></div>
                         </div>
+                        
+                        <!-- NEW FEATURE: GRID CURTAILMENT RISK -->
+                        <div>
+                            <div class="flex justify-between items-center"><label for="gridCurtailment" class="block text-sm font-medium text-gray-700">Grid Curtailment Risk (%)<span class="help-icon" data-modal="gridCurtailment">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="gridCurtailment" min="0" max="10" step="0.1" value="0" class="w-full"><span id="gridCurtailmentValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">0.0%</span></div>
+                            <p class="text-xs text-slate-500 mt-1">Reduces effective annual energy generation.</p>
+                        </div>
+                        
                         <div>
                             <div class="flex justify-between items-center"><label for="thermalEfficiency" class="block text-sm font-medium text-gray-700">Thermal Efficiency (%)<span class="help-icon" data-modal="thermalEfficiency">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="thermalEfficiency" min="20" max="55" step="0.5" value="33" class="w-full"><span id="thermalEfficiencyValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">33.0%</span></div>
@@ -388,6 +418,12 @@
                             <div class="flex justify-between items-center"><label for="fuelBurnup" class="block text-sm font-medium text-gray-700">Fuel Burnup (GWd/tU)<span class="help-icon" data-modal="fuelBurnup">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="fuelBurnup" min="5" max="200" value="45" class="w-full"><span id="fuelBurnupValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">45 GWd/tU</span></div>
                         </div>
+                         <!-- NEW FEATURE: INITIAL ENRICHMENT LEVEL -->
+                        <div>
+                            <div class="flex justify-between items-center"><label for="enrichmentLevel" class="block text-sm font-medium text-gray-700">Initial Uranium Enrichment (%)<span class="help-icon" data-modal="enrichmentLevel">(?)</span></label></div>
+                            <div class="flex items-center space-x-4"><input type="range" id="enrichmentLevel" min="2" max="5" step="0.1" value="4.5" class="w-full"><span id="enrichmentLevelValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">4.5%</span></div>
+                            <p class="text-xs text-slate-500 mt-1">Affects maximum Burnup achievable; currently capped at 65 GWd/tU max for standard LWR fuel.</p>
+                        </div>
                         <div>
                             <label for="fuelSupplier" class="block text-sm font-medium text-gray-700">Fuel Cycle Supplier<span class="help-icon" data-modal="fuelSupplier">(?)</span></label>
                             <select id="fuelSupplier" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
@@ -423,6 +459,12 @@
                                 <option value="embedded">Embedded Matrix Disposal</option>
                                 <option value="foreign">Foreign Reprocessing/Repository</option>
                             </select>
+                            <!-- NEW FEATURE: REPOSITORY CAPEX -->
+                             <div id="repositoryCapexInput" class="space-y-1 mt-2 hidden">
+                                <label for="repositoryCapex" class="block text-sm font-medium text-gray-700">Repository CAPEX (₱B)<span class="help-icon" data-modal="repositoryCapex">(?)</span></label>
+                                <input type="number" id="repositoryCapex" value="30" min="0" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <p class="text-xs text-slate-500">Fixed upfront cost added to initial investment.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -440,7 +482,7 @@
                         <div id="market_inputs" class="space-y-4">
                             <div>
                                 <label for="electricityPrice" class="block text-sm font-medium text-gray-700">Base Electricity Price (₱/MWh)<span class="help-icon" data-modal="electricityPrice">(?)</span></label>
-                                <input type="number" id="electricityPrice" value="5800" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                <input type="number" id="electricityPrice" value="3040" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
                             <div>
                                 <div class="flex justify-between items-center"><label for="priceEscalation" class="block text-sm font-medium text-gray-700">Price Escalation (%/yr)<span class="help-icon" data-modal="priceEscalation">(?)</span></label></div>
@@ -466,7 +508,7 @@
                             </div>
                               <div>
                                 <label for="cfdMarketPrice" class="block text-sm font-medium text-gray-700">Market Reference Price (₱/MWh)</label>
-                                <input type="number" id="cfdMarketPrice" value="5800" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
+                                <input type="number" id="cfdMarketPrice" value="3040" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
                             </div>
                              <div>
                                 <label for="cfdDuration" class="block text-sm font-medium text-gray-700">Contract Duration (Years)</label>
@@ -558,18 +600,19 @@
             deploymentStrategy: 'single', fleetCapexDiscount: 15,
             reactorType: 'ap1000', capacity: 1117, lifetime: 60, constructionTime: 7,
             discountRateManual: 8, capacityFactor: 90, inflationRate: 2, decommissioningCost: 15, constructionOverrun: 0, useDecomFundToggle: true,
-            thermalEfficiency: 34, fuelBurnup: 50, fuelSupplier: 'generic', geopoliticalRisk: 0, wasteDisposal: 'interim',
+            thermalEfficiency: 34, fuelBurnup: 50, fuelSupplier: 'generic', geopoliticalRisk: 0, wasteDisposal: 'interim', repositoryCapex: 30, socialOppositionRisk: 0, licensingDelay: 0, gridCurtailment: 0,
             turbineSupplier: 'generic', rpvSupplier: 'generic',
             epcContractor: 'generic', omContractor: 'generic', insuranceProvider: 'generic_pool', 
             cogenerationTechnology: 'none', cogenerationRevenue: 0,
-            siteLocation: 'bataan',
+            siteLocation: 'mariveles',
             jvPartner: 'none', govtSupport: 'none', ptcValue: 580,
             debtRatio: 70, costOfEquity: 12, loanProvider: 'comm_bank', taxRate: 25, useWaccToggle: true,
-            revenueModel: 'market', electricityPrice: 5800, priceEscalation: 1.5,
+            revenueModel: 'market', electricityPrice: 3040, priceEscalation: 1.5,
             fitPrice: 6500, fitDuration: 20,
-            cfdStrikePrice: 6200, cfdMarketPrice: 5800, cfdDuration: 25,
+            cfdStrikePrice: 6200, cfdMarketPrice: 3040, cfdDuration: 25,
             auctionPrice: 5500,
             deuteriumCost: 29000000, deuteriumSource: 'foreign',
+            enrichmentLevel: 4.5,
         };
         const usdToPhpRate = 58.0;
 
@@ -613,11 +656,11 @@
         };
 
         const wasteDisposalData = {
-            interim: { oAndM_modifier: 0.02, decom_modifier: 0 },
-            vertical: { oAndM_modifier: 0, decom_modifier: 0.15 },
-            horizontal: { oAndM_modifier: 0, decom_modifier: 0.12 },
-            embedded: { oAndM_modifier: 0, decom_modifier: 0.20 },
-            foreign: { oAndM_modifier: 0.10, decom_modifier: 0.05 }
+            interim: { oAndM_modifier: 0.02, decom_modifier: 0, capex_trigger: false },
+            vertical: { oAndM_modifier: 0, decom_modifier: 0.15, capex_trigger: true },
+            horizontal: { oAndM_modifier: 0, decom_modifier: 0.12, capex_trigger: true },
+            embedded: { oAndM_modifier: 0, decom_modifier: 0.20, capex_trigger: true },
+            foreign: { oAndM_modifier: 0.10, decom_modifier: 0.05, capex_trigger: false }
         };
 
         const componentSupplierData = { // Expanded to 32+ options each
@@ -707,11 +750,17 @@
         };
 
         const siteData = {
-            bataan: { name: "Bataan Peninsula", coords: [14.63, 120.45], seismicModifier: 0.05, gridModifier: 0.01, laborModifier: 0.02 },
-            cagayan: { name: "Cagayan North", coords: [18.35, 121.77], seismicModifier: 0.03, gridModifier: 0.05, laborModifier: -0.05 },
-            palawan: { name: "Palawan", coords: [9.75, 118.75], seismicModifier: 0.01, gridModifier: 0.08, laborModifier: -0.02 },
-            cebu: { name: "Cebu", coords: [10.31, 123.89], seismicModifier: 0.06, gridModifier: 0.02, laborModifier: 0.05 },
-            davnor: { name: "Davao del Norte", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
+            // Updated/Expanded Site Locations
+            mariveles: { name: "Mariveles, Bataan (BNPP)", coords: [14.4719, 120.5217], seismicModifier: 0.05, gridModifier: 0.01, laborModifier: 0.02 },
+            batangas: { name: "Batangas City, Batangas", coords: [13.75, 121.05], seismicModifier: 0.06, gridModifier: 0.015, laborModifier: 0.03 },
+            san_rafael: { name: "San Rafael, Bulacan", coords: [14.95, 120.94], seismicModifier: 0.04, gridModifier: 0.02, laborModifier: 0.03 },
+            labrador: { name: "Labrador, Pangasinan", coords: [15.93, 120.08], seismicModifier: 0.04, gridModifier: 0.03, laborModifier: -0.01 },
+            aroroy: { name: "Aroroy, Masbate", coords: [12.56, 123.36], seismicModifier: 0.07, gridModifier: 0.06, laborModifier: -0.04 },
+            inagawan: { name: "Brgy. Inagawan, Palawan", coords: [9.85, 118.66], seismicModifier: 0.01, gridModifier: 0.08, laborModifier: -0.03 },
+            concepcion: { name: "Brgy. Concepcion, Palawan", coords: [10.25, 119.33], seismicModifier: 0.01, gridModifier: 0.07, laborModifier: -0.03 },
+            cagayan: { name: "Aparri, Cagayan (North)", coords: [18.35, 121.77], seismicModifier: 0.03, gridModifier: 0.05, laborModifier: -0.05 },
+            cebu: { name: "Toledo City, Cebu", coords: [10.38, 123.63], seismicModifier: 0.06, gridModifier: 0.02, laborModifier: 0.05 },
+            davnor: { name: "Davao Gulf Area", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
         };
         
         // --- NEW REFERENCES DATA STRUCTURE ---
@@ -722,7 +771,9 @@
             { id: 4, type: "O&M and Insurance Cost", source: "US EIA & General Nuclear Insurance Pool Data", note: "Fixed and variable O&M data, including typical annual insurance premiums per MWe, converted to PHP." },
             { id: 5, type: "Financial Parameters", source: "Philippine National Grid Corp. (NGCP) & SEC Filings (2023)", note: "Corporate Tax Rate, assumed Cost of Equity/Debt, and WESM Price baselines." },
             { id: 6, type: "Decommissioning Cost", source: "World Bank / OECD NEA Joint Report on Decommissioning (2020)", note: "Assumed range of 10-20% of CAPEX for total decommissioning liability." },
-            { id: 7, type: "Component Premiums", source: "Proprietary Industry Benchmarks & OEM Public Data", note: "Supplier-specific CAPEX modifiers for Turbine, RPV, and EPC based on relative market perception of cost/risk." }
+            { id: 7, type: "Component Premiums", source: "Proprietary Industry Benchmarks & OEM Public Data", note: "Supplier-specific CAPEX modifiers for Turbine, RPV, and EPC based on relative market perception of cost/risk." },
+            { id: 8, type: "WESM Price Update", source: "IEMOP Data, September 2025", note: "Updated Base Electricity Price (₱/MWh) to the Sept 2025 system-wide average spot price (₱3,040/MWh)." },
+            { id: 9, type: "Regulatory/Social Risk", source: "Conceptual Risk Model", note: "Models project delays and cost increases due to non-technical, political, or social opposition factors." }
         ];
 
         const modalInfo = {
@@ -731,49 +782,54 @@
             reactorType: { title: "Reactor Type", text: "The specific nuclear reactor technology. Different designs have varying costs, efficiency, capacity, and construction times. This is the most critical choice influencing the project's overall profile." },
             siteLocation: { title: "Site Location", text: "The geographical location of the plant in the Philippines. This choice impacts costs related to seismic resilience, grid connection, and local labor." },
             discountRate: { title: "Discount Rate (%)", text: "The rate used to convert future cash flows into today's value (present value). It represents the minimum acceptable rate of return for an investment, accounting for risk and the time value of money. A higher rate makes long-term projects less attractive." },
-            constructionOverrun: { title: "Construction Overrun (%)", text: "The percentage by which the final construction cost exceeds the initial budget (CAPEX). This is a major risk for large infrastructure projects, and overruns can severely impact financial viability." },
+            constructionOverrun: { title: "Construction Overrun (Engineering Risk, %)", text: "The percentage by which the final construction cost exceeds the initial budget (CAPEX), based purely on technical/engineering risks. The total cost risk includes regulatory/social factors." },
             decommissioningFund: { title: "Use Decommissioning Fund", text: "Toggle to model decommissioning costs. When ON, costs are paid into a fund annually during operation (more realistic). When OFF, the cost is treated as a single lump-sum payment at the end of the plant's life." },
             decommissioningCost: { title: "Decommissioning (% CAPEX)", text: "The estimated cost to safely dismantle the reactor and remediate the site at the end of its life, expressed as a percentage of the initial construction cost. This is a significant future liability." },
             capacity: { title: "Power Capacity (MWe)", text: "The nominal net electrical output of the power plant, measured in Megawatts electric (MWe). Higher capacity means more electricity generation and revenue, but also higher initial costs." },
             lifetime: { title: "Plant Lifetime (Years)", text: "The planned operational lifespan of the power plant. Longer lifetimes allow the initial investment to be spread over more years of revenue generation, generally improving financial metrics." },
             constructionTime: { title: "Construction Time (Years)", text: "The duration from the start of construction to the beginning of commercial operation. Longer construction periods increase financing costs and delay the start of revenue generation." },
+            licensingDelay: { title: "Regulatory/Licensing Delay (Years)", text: "Extra time added to the construction phase due to non-technical factors like permitting, regulatory changes, or legal challenges. This increases the Interest During Construction (IDC)." },
             capacityFactor: { title: "Capacity Factor (%)", text: "The ratio of the plant's actual electricity output over a year to its maximum possible output. A high capacity factor (typically >90% for nuclear) is crucial for economic performance as it maximizes revenue from the fixed investment." },
+            gridCurtailment: { title: "Grid Curtailment Risk (%)", text: "The percentage of generated energy that cannot be delivered to the grid due to infrastructure bottlenecks or stability issues. This directly reduces annual revenue." },
             thermalEfficiency: { title: "Thermal Efficiency (%)", text: "The percentage of thermal energy (heat) generated by the reactor that is converted into electrical energy. Higher efficiency means more electricity is produced for the same amount of fuel, reducing fuel costs." },
-            fuelBurnup: { title: "Fuel Burnup (GWd/tU)", text: "A measure of the total energy extracted from a given mass of nuclear fuel, typically in Gigawatt-days per metric ton of Uranium. Higher burnup indicates more efficient fuel use, leading to lower fuel consumption and less waste." },
-            fuelSupplier: { title: "Fuel Cycle Supplier", text: "The company or entity supplying the nuclear fuel. The choice affects fuel cost due to different pricing, technologies, and geopolitical factors. This models the entire fuel cycle, from mining to fabrication." },
+            fuelBurnup: { title: "Fuel Burnup (GWd/tU)", text: "A measure of the total energy extracted from a given mass of nuclear fuel. Higher burnup indicates more efficient fuel use." },
+            enrichmentLevel: { title: "Initial Uranium Enrichment (%)", text: "The U-235 concentration in the fuel. Higher enrichment enables higher maximum fuel burnup (capped at 65 GWd/tU for standard fuel in this model)." },
+            fuelSupplier: { title: "Fuel Cycle Supplier", text: "The company or entity supplying the nuclear fuel. The choice affects fuel cost due to different pricing, technologies, and geopolitical factors." },
             geopoliticalRisk: { title: "Geopolitical Risk Premium (%)", text: "A surcharge on fuel costs to model the financial impact of global conflicts, sanctions, or other events that disrupt the uranium supply chain." },
-            deuteriumCost: { title: "Deuterium Cost (PHP/1000L)", text: "The cost of heavy water (D2O), used as a moderator and coolant in CANDU/PHWR reactors. This is a significant upfront cost." },
+            deuteriumCost: { title: "Deuterium Cost (PHP/1000L)", text: "The cost of heavy water ($\text{D}_2\text{O}$), used as a moderator and coolant in CANDU/PHWR reactors. This is a significant upfront cost." },
             deuteriumSource: { title: "Deuterium Source", text: "Whether heavy water is sourced locally or internationally. Foreign sourcing may incur higher transport and logistics costs." },
-            wasteDisposal: { title: "Waste Disposal Strategy", text: "The long-term plan for managing spent nuclear fuel. Options range from simple on-site storage to permanent geological repositories or foreign reprocessing. This choice significantly impacts long-term O&M and/or decommissioning costs." },
+            wasteDisposal: { title: "Waste Disposal Strategy", text: "The long-term plan for managing spent nuclear fuel. This impacts long-term O&M and/or decommissioning costs." },
+            repositoryCapex: { title: "Repository CAPEX (₱B)", text: "The initial investment required to construct a local geological repository for spent fuel, applicable only when a local disposal option is selected." },
+            socialOppositionRisk: { title: "Social Opposition/Litigation Risk (%)", text: "A non-technical risk factor applied as a modifier to the total initial project CAPEX, primarily covering costs associated with social unrest, protests, legal challenges, and community programs." },
             revenueModel: { title: "Revenue Model", text: "The mechanism for selling electricity. This determines revenue stability and predictability. WESM is the spot market. FIT/PSA/Auction provide fixed prices, while CfD provides a price floor via a 'strike price'." },
-            electricityPrice: { title: "Base Electricity Price (₱/MWh)", text: "The starting price received for each Megawatt-hour of electricity sold to the grid. This is a primary driver of project revenue." },
-            priceEscalation: { title: "Price Escalation (%/yr)", text: "The expected annual percentage increase in the electricity price over the plant's lifetime, independent of general inflation. This models changes in energy market dynamics." },
-            inflationRate: { title: "Cost Inflation (%/yr)", text: "The expected annual percentage increase in the plant's operational costs (O&M) and fuel costs due to general economic inflation." },
-            carbonPrice: { title: "Carbon Price (₱/ton CO₂)", text: "A price placed on carbon dioxide emissions. Since nuclear power is a low-carbon source, it can generate additional revenue from carbon credits by displacing fossil fuel plants (e.g., coal)." },
-            turbineSupplier: { title: "Turbine Generator Supplier", text: "The manufacturer of the steam turbine and electrical generator. This is a critical component, and the choice of supplier can affect both the initial capital cost (CAPEX) and plant efficiency." },
-            rpvSupplier: { title: "Reactor Pressure Vessel (RPV) Supplier", text: "The manufacturer of the reactor pressure vessel, the high-strength steel container for the reactor core. This is a highly specialized, long-lead-time component, and supplier choice impacts the initial capital cost." },
-            epcContractor: { title: "EPC Contractor", text: "The Engineering, Procurement, and Construction firm responsible for the plant's delivery. Their experience and pricing directly impact the initial CAPEX and the risk of construction delays and cost overruns." },
-            omContractor: { title: "O&M Contractor", text: "The firm responsible for the long-term operation and maintenance of the plant. Outsourcing O&M can affect annual costs and plant performance. 'In-house' assumes the plant owner manages O&M directly." },
-            insuranceProvider: { title: "Insurance Provider", text: "Nuclear power plants require specialized liability insurance. The choice of insurance pool affects the annual premium, which is a component of the O&M cost." },
-            cogenerationTechnology: { title: "Co-generation Technology", text: "The process of using 'waste' heat from the reactor for applications other than electricity generation. This creates additional revenue streams. Selecting a technology will auto-populate the revenue field below, which can be manually overridden." },
-            cogenerationRevenue: { title: "Co-generation Revenue", text: "Annual revenue from non-electricity products, such as industrial steam, district heating, desalinated water, or hydrogen. This provides an additional income stream, improving the plant's business case." },
-            lcoe: { title: "Levelized Cost of Energy (LCOE)", text: "The average revenue per unit of electricity generated that would be required to recover the costs of building and operating a generating plant during an assumed financial life. It is the best measure for comparing the cost of different generation technologies." },
-            npv: { title: "Net Present Value (NPV)", text: "The difference between the present value of cash inflows and the present value of cash outflows over a period of time. A positive NPV indicates that the projected earnings generated by a project (in present pesos) exceeds the anticipated costs. A positive NPV is desirable." },
-            irr: { title: "Internal Rate of Return (IRR)", text: "The discount rate that makes the Net Present Value (NPV) of all cash flows from a particular project equal to zero. If the IRR of a project exceeds its required rate of return (the Discount Rate), that project is desirable." },
-            payback: { title: "Discounted Payback Period", text: "The number of years it takes for a project to recover its initial investment, taking into account the time value of money. It shows how long it takes for the discounted revenues to equal the initial cost." },
-            waccToggle: { title: "Use WACC", text: "Toggle to use the Weighted Average Cost of Capital (WACC) as the discount rate for the project. WACC provides a more realistic discount rate by blending the cost of debt and equity based on the project's financing structure." },
-            jvPartner: { title: "Joint Venture Partner", text: "A local partner in the project. A strong local JV partner can de-risk the project politically and financially, which can lower the required rate of return for equity investors (Cost of Equity)." },
-            govtSupport: { title: "Government Support", text: "Financial incentives provided by the government. Loan Guarantees reduce the cost of debt, making financing cheaper. Production Tax Credits (PTC) add a direct bonus to revenue for each MWh sold." },
-            debtRatio: { title: "Debt Ratio (%)", text: "The proportion of the project's initial investment that is financed through debt (loans). The remainder is financed by equity (investors' capital). A typical ratio for infrastructure is 70-80%." },
-            costOfEquity: { title: "Cost of Equity (%)", text: "The return that equity investors require on their investment in the project. This is typically higher than the cost of debt because investors bear more risk. This value can be influenced by a JV partner." },
-            loanProvider: { title: "Loan Provider (Cost of Debt)", text: "The source of the project's debt financing. Government Export-Import (EXIM) banks often provide lower interest rates than commercial banks to promote their domestic nuclear industry." },
-            taxRate: { title: "Corporate Tax Rate (%)", text: "The tax rate applied to the project's profits. Interest payments on debt are typically tax-deductible, creating a 'tax shield' that reduces the effective cost of debt." }
+            electricityPrice: { title: "Base Electricity Price (₱/MWh)", text: "The starting price received for each Megawatt-hour of electricity sold to the grid (WESM average as of Sept 2025)." },
+            priceEscalation: { title: "Price Escalation (%/yr)", text: "The expected annual percentage increase in the electricity price over the plant's lifetime." },
+            inflationRate: { title: "Cost Inflation (%/yr)", text: "The expected annual percentage increase in the plant's operational costs (O&M) and fuel costs." },
+            carbonPrice: { title: "Carbon Price (₱/ton $\text{CO}_2$)", text: "A price placed on carbon dioxide emissions. Nuclear power can generate additional revenue from carbon credits by displacing fossil fuel plants." },
+            turbineSupplier: { title: "Turbine Generator Supplier", text: "The manufacturer of the steam turbine and electrical generator. Affects CAPEX and plant efficiency." },
+            rpvSupplier: { title: "Reactor Pressure Vessel (RPV) Supplier", text: "The manufacturer of the reactor pressure vessel. Affects CAPEX." },
+            epcContractor: { title: "EPC Contractor", text: "The Engineering, Procurement, and Construction firm. Impacts CAPEX and construction risk." },
+            omContractor: { title: "O&M Contractor", text: "The firm responsible for long-term operation and maintenance. Affects annual costs." },
+            insuranceProvider: { title: "Insurance Provider", text: "Nuclear liability insurance provider. Affects O&M costs." },
+            cogenerationTechnology: { title: "Co-generation Technology", text: "The use of 'waste' heat for industrial or community applications, providing extra revenue." },
+            cogenerationRevenue: { title: "Co-generation Revenue", text: "Annual revenue from non-electricity products (e.g., desalinated water, hydrogen)." },
+            lcoe: { title: "Levelized Cost of Energy (LCOE)", text: "The average revenue per unit of electricity generated required to recover all costs over the project's life. Best measure for comparing generation costs." },
+            npv: { title: "Net Present Value (NPV)", text: "The discounted value of all future cash flows. A positive NPV indicates a profitable project at the given discount rate." },
+            irr: { title: "Internal Rate of Return (IRR)", text: "The discount rate at which the NPV equals zero. If IRR > Discount Rate, the project is worthwhile." },
+            payback: { title: "Discounted Payback Period", text: "The number of years it takes for discounted cumulative cash flow to turn positive." },
+            waccToggle: { title: "Use WACC", text: "Uses the Weighted Average Cost of Capital as the discount rate, blending debt and equity costs for realistic risk assessment." },
+            jvPartner: { title: "Joint Venture Partner", text: "A local partner. Can de-risk the project and lower the Cost of Equity." },
+            govtSupport: { title: "Government Support", text: "Financial incentives (Loan Guarantees reduce cost of debt; PTCs boost revenue)." },
+            debtRatio: { title: "Debt Ratio (%)", text: "The proportion of project financing coming from debt (loans)." },
+            costOfEquity: { title: "Cost of Equity (%)", text: "The return required by equity investors." },
+            loanProvider: { title: "Loan Provider (Cost of Debt)", text: "The source of debt financing, affecting the interest rate." },
+            taxRate: { title: "Corporate Tax Rate (%)", text: "The tax rate applied to the project's profits." }
         };
 
-        // --- DOM ELEMENT REFERENCES ---
+        // --- DOM ELEMENT REFERENCES (partial list) ---
         const elements = {
             deploymentStrategy: document.getElementById('deploymentStrategy'), smrFleetOptions: document.getElementById('smrFleetOptions'), smrFleetSummary: document.getElementById('smrFleetSummary'), fleetCapexDiscount: document.getElementById('fleetCapexDiscount'), fleetCapexDiscountValue: document.getElementById('fleetCapexDiscountValue'),
-            reactorType: document.getElementById('reactorType'), capacity: document.getElementById('capacity'), lifetime: document.getElementById('lifetime'), constructionTime: document.getElementById('constructionTime'), discountRateManual: document.getElementById('discountRateManual'), capacityFactor: document.getElementById('capacityFactor'), inflationRate: document.getElementById('inflationRate'), decommissioningCost: document.getElementById('decommissioningCost'), useDecomFundToggle: document.getElementById('useDecomFundToggle'), decomLumpSum: document.getElementById('decomLumpSum'), constructionOverrun: document.getElementById('constructionOverrun'), thermalEfficiency: document.getElementById('thermalEfficiency'), fuelBurnup: document.getElementById('fuelBurnup'), fuelSupplier: document.getElementById('fuelSupplier'), geopoliticalRisk: document.getElementById('geopoliticalRisk'), geopoliticalRiskValue: document.getElementById('geopoliticalRiskValue'), wasteDisposal: document.getElementById('wasteDisposal'), deuteriumSection: document.getElementById('deuteriumSection'), deuteriumCost: document.getElementById('deuteriumCost'), deuteriumSource: document.getElementById('deuteriumSource'),
+            reactorType: document.getElementById('reactorType'), capacity: document.getElementById('capacity'), lifetime: document.getElementById('lifetime'), constructionTime: document.getElementById('constructionTime'), licensingDelay: document.getElementById('licensingDelay'), licensingDelayValue: document.getElementById('licensingDelayValue'), gridCurtailment: document.getElementById('gridCurtailment'), gridCurtailmentValue: document.getElementById('gridCurtailmentValue'), discountRateManual: document.getElementById('discountRateManual'), capacityFactor: document.getElementById('capacityFactor'), inflationRate: document.getElementById('inflationRate'), decommissioningCost: document.getElementById('decommissioningCost'), useDecomFundToggle: document.getElementById('useDecomFundToggle'), decomLumpSum: document.getElementById('decomLumpSum'), constructionOverrun: document.getElementById('constructionOverrun'), thermalEfficiency: document.getElementById('thermalEfficiency'), fuelBurnup: document.getElementById('fuelBurnup'), fuelSupplier: document.getElementById('fuelSupplier'), geopoliticalRisk: document.getElementById('geopoliticalRisk'), geopoliticalRiskValue: document.getElementById('geopoliticalRiskValue'), wasteDisposal: document.getElementById('wasteDisposal'), deuteriumSection: document.getElementById('deuteriumSection'), deuteriumCost: document.getElementById('deuteriumCost'), deuteriumSource: document.getElementById('deuteriumSource'), repositoryCapex: document.getElementById('repositoryCapex'), repositoryCapexInput: document.getElementById('repositoryCapexInput'), socialOppositionRisk: document.getElementById('socialOppositionRisk'), socialOppositionRiskValue: document.getElementById('socialOppositionRiskValue'), totalConstructionRisk: document.getElementById('totalConstructionRisk'),
             revenueModel: document.getElementById('revenueModel'), market_inputs: document.getElementById('market_inputs'), fit_inputs: document.getElementById('fit_inputs'), cfd_inputs: document.getElementById('cfd_inputs'), auction_inputs: document.getElementById('auction_inputs'),
             electricityPrice: document.getElementById('electricityPrice'), priceEscalation: document.getElementById('priceEscalation'), priceEscalationValue: document.getElementById('priceEscalationValue'),
             fitPrice: document.getElementById('fitPrice'), fitDuration: document.getElementById('fitDuration'),
@@ -788,8 +844,9 @@
             capacityValue: document.getElementById('capacityValue'), lifetimeValue: document.getElementById('lifetimeValue'), constructionTimeValue: document.getElementById('constructionTimeValue'), discountRateValueManual: document.getElementById('discountRateValueManual'),
             debtRatioValue: document.getElementById('debtRatioValue'), costOfEquityValue: document.getElementById('costOfEquityValue'),
             capacityFactorValue: document.getElementById('capacityFactorValue'), inflationRateValue: document.getElementById('inflationRateValue'), decommissioningCostValue: document.getElementById('decommissioningCostValue'), constructionOverrunValue: document.getElementById('constructionOverrunValue'), thermalEfficiencyValue: document.getElementById('thermalEfficiencyValue'), fuelBurnupValue: document.getElementById('fuelBurnupValue'), 
+            enrichmentLevel: document.getElementById('enrichmentLevel'), enrichmentLevelValue: document.getElementById('enrichmentLevelValue'),
             lcoe: document.getElementById('lcoe'), npv: document.getElementById('npv'), irr: document.getElementById('irr'), payback: document.getElementById('payback'),
-            referencesList: document.getElementById('referencesList') // NEW ELEMENT
+            referencesList: document.getElementById('referencesList')
         };
         
         let costChart, cashflowChart, map;
@@ -824,9 +881,21 @@
             const waste = wasteDisposalData[s.wasteDisposal];
             
             const currentCapacity = s.deploymentStrategy === 'fleet' ? 1200 : s.capacity;
+            const currentDiscountRate = (s.useWaccToggle ? calculateWACC(s) : s.discountRateManual) / 100;
 
             const efficiencyModifier = 0.33 / (s.thermalEfficiency / 100);
-            const burnupModifier = 45 / s.fuelBurnup;
+            
+            // Limit Fuel Burnup based on Enrichment Level (simple linear approximation)
+            let maxBurnup = 65; // Max for typical 4.5% fuel
+            if (s.enrichmentLevel > 4.5) {
+                maxBurnup = 65 + (s.enrichmentLevel - 4.5) * 10;
+            } else if (s.enrichmentLevel < 4.5) {
+                maxBurnup = 65 - (4.5 - s.enrichmentLevel) * 10;
+            }
+            maxBurnup = Math.max(5, Math.min(200, maxBurnup));
+            const effectiveBurnup = Math.min(s.fuelBurnup, maxBurnup); // Use the lower of user input or max allowed by enrichment
+            
+            const burnupModifier = 45 / effectiveBurnup;
             const fuelCostModifier = efficiencyModifier * burnupModifier * (1 + fuelSurcharge + geoRiskSurcharge);
 
             let initialInvestment = data.capexPerMWe * currentCapacity;
@@ -834,19 +903,37 @@
                 initialInvestment *= (1 - s.fleetCapexDiscount / 100);
             }
             initialInvestment *= (1 + turbineModifier + rpvModifier + epc.capexModifier + site.seismicModifier + site.gridModifier);
-            const totalOverrun = (s.constructionOverrun + epc.riskModifier) / 100;
-            initialInvestment *= (1 + totalOverrun);
             
+            // Calculate total risk factor
+            const totalEngineeringOverrun = (s.constructionOverrun + epc.riskModifier) / 100;
+            const totalProjectRisk = totalEngineeringOverrun + (s.socialOppositionRisk / 100);
+            initialInvestment *= (1 + totalProjectRisk);
+            
+            // Add initial IDC (Interest During Construction) factor due to project and licensing delays
+            const totalPreOpTime = s.constructionTime + s.licensingDelay;
+            // Simplified IDC compounding factor (assuming half of cost is spread over construction period)
+            const idcFactor = Math.pow(1 + currentDiscountRate, totalPreOpTime) - 1;
+            initialInvestment *= (1 + idcFactor * 0.1); // Apply 10% of IDC factor on total CAPEX as a simplified multiplier
+
             // Add Deuterium cost for CANDU
             if (s.reactorType === 'candu') {
-                // Assume 0.8 tonnes of D2O per MWe
-                const d2oAmount = 0.8 * currentCapacity * 1000; // in Liters
+                const d2oAmount = 0.8 * currentCapacity * 1000; // in Liters (0.8 tonnes/MWe)
                 let d2oCost = s.deuteriumCost * (d2oAmount / 1000);
-                if(s.deuteriumSource === 'foreign') d2oCost *= 1.15; // 15% surcharge for foreign
+                if(s.deuteriumSource === 'foreign') d2oCost *= 1.15;
                 initialInvestment += d2oCost;
             }
-
-            const annualGeneration = currentCapacity * 24 * 365 * (s.capacityFactor / 100);
+            
+            // Add Waste Repository CAPEX if applicable
+            if (waste.capex_trigger) {
+                initialInvestment += s.repositoryCapex * 1e9; // Convert from Billions (₱B)
+            }
+            
+            const effectiveCapacityFactor = s.capacityFactor / 100;
+            // Apply grid curtailment risk to generation
+            const effectiveGenerationFactor = (1 - s.gridCurtailment / 100);
+            
+            const annualGeneration = currentCapacity * 24 * 365 * effectiveCapacityFactor * effectiveGenerationFactor;
+            
             let baseOAndM = data.oAndMPerMWe * currentCapacity * (1 + omModifier + site.laborModifier + waste.oAndM_modifier);
             const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * currentCapacity;
             baseOAndM += annualInsurance;
@@ -862,16 +949,29 @@
                 annualGeneration,
                 baseAnnualFuelCost: data.fuelCostPerMWh * annualGeneration * fuelCostModifier,
                 decommissioningCost: s.useDecomFundToggle ? 0 : totalDecomCost,
-                annualCarbonRevenue: annualGeneration * 0.9 * s.carbonPrice, // Assuming displaces coal at 0.9 tCO2/MWh
-                annualCogenerationRevenue: s.cogenerationRevenue * 1e6, // Convert from millions
+                annualCarbonRevenue: annualGeneration * 0.9 * s.carbonPrice,
+                annualCogenerationRevenue: s.cogenerationRevenue * 1e6,
                 ptcBonus: (s.govtSupport === 'ptc') ? s.ptcValue : 0
             };
         }
 
         function calculateLifetimeCashflows(s, base) {
-            let cashflows = Array(s.constructionTime).fill(-base.annualConstructionCost);
+            // Total pre-operational years = Construction + Licensing Delay
+            const totalPreOpTime = s.constructionTime + s.licensingDelay;
             
+            // Construction costs are spread over s.constructionTime years, starting at Year 1.
+            let cashflows = Array(totalPreOpTime).fill(0);
+            const constructionCostPerYear = base.initialInvestment / s.constructionTime;
+            
+            // 1. Initial CAPEX outflow during construction period (Years 1 to s.constructionTime)
+            for (let i = 0; i < s.constructionTime; i++) {
+                cashflows[i] = -constructionCostPerYear;
+            }
+            // If there is a licensing delay, subsequent years in the totalPreOpTime array will remain 0, representing lost opportunity cost/dead time.
+
+            // 2. Operational Cash Flows
             for (let i = 1; i <= s.lifetime; i++) {
+                const yearIndex = totalPreOpTime + i - 1; // Cash flow starts after construction + delay
                 const costInflation = Math.pow(1 + (s.inflationRate / 100), i - 1);
                 let revenueForYear = 0;
                 
@@ -884,7 +984,6 @@
                         if (i <= s.fitDuration) {
                             revenueForYear = (s.fitPrice + base.ptcBonus) * base.annualGeneration;
                         } else {
-                            // Reverts to market price after FIT period, assuming it starts from base and escalates from year of expiry
                             const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - s.fitDuration);
                             revenueForYear = (s.electricityPrice * marketPriceInflation + base.ptcBonus) * base.annualGeneration;
                         }
@@ -899,7 +998,6 @@
                         }
                         break;
                     case 'auction':
-                        // Auction price is typically fixed for the lifetime
                         revenueForYear = (s.auctionPrice + base.ptcBonus) * base.annualGeneration;
                         break;
                 }
@@ -907,10 +1005,12 @@
                 const totalAnnualRevenue = revenueForYear + (base.annualCarbonRevenue * costInflation) + (base.annualCogenerationRevenue * costInflation);
                 const inflatedOAndM = base.annualOAndM * costInflation;
                 const inflatedFuelCost = base.baseAnnualFuelCost * costInflation;
-                cashflows.push(totalAnnualRevenue - inflatedOAndM - inflatedFuelCost);
+                cashflows[yearIndex] = totalAnnualRevenue - inflatedOAndM - inflatedFuelCost;
             }
+            
+            // 3. Decommissioning Outflow (end of plant life)
             if (!s.useDecomFundToggle) {
-                cashflows.push(-base.decommissioningCost);
+                cashflows[cashflows.length - 1] -= base.decommissioningCost;
             }
             return cashflows;
         }
@@ -918,6 +1018,7 @@
         function calculateFinancialMetrics(cashflows, s, base) {
             const discountRate = (s.useWaccToggle ? calculateWACC(s) : s.discountRateManual) / 100;
             
+            // The cashflow array index corresponds to (Year - 1)
             const calculateNPV = (rate) => cashflows.reduce((acc, cf, i) => acc + cf / Math.pow(1 + rate, i + 1), 0);
             const npv = calculateNPV(discountRate);
 
@@ -932,48 +1033,63 @@
             }
 
             let cumulativeDiscountedCF = 0, lastCumulativeCF = 0, paybackPeriod = "N/A";
+            const startOpYear = s.constructionTime + s.licensingDelay;
              for (let i = 0; i < cashflows.length; i++) {
                 lastCumulativeCF = cumulativeDiscountedCF;
                 const discountedCF = cashflows[i] / Math.pow(1 + discountRate, i + 1);
                 cumulativeDiscountedCF += discountedCF;
-                if (cumulativeDiscountedCF >= 0 && i >= s.constructionTime) {
-                    const fullYears = i + 1 - s.constructionTime;
+                
+                // Payback calculated from the point where negative cumulative flow turns positive
+                if (cumulativeDiscountedCF >= 0 && i >= startOpYear - 1) {
+                    const fullYears = i + 1;
                     const fraction = discountedCF > 0 ? Math.abs(lastCumulativeCF) / discountedCF : 0;
-                    paybackPeriod = (fullYears -1 + fraction).toFixed(1) + " Yrs";
+                    paybackPeriod = (fullYears - 1 + fraction).toFixed(1) + " Yrs";
                     break;
                 }
             }
             
             let totalDiscountedGeneration = 0;
             let discountedCapex = 0, discountedOAndM = 0, discountedFuel = 0, discountedDecommissioning = 0;
+            
+            const waste = wasteDisposalData[s.wasteDisposal];
+            const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * (s.deploymentStrategy === 'fleet' ? 1200 : s.capacity);
+
             cashflows.forEach((cf, i) => {
-                const year = i + 1, discountFactor = Math.pow(1 + discountRate, year);
+                const year = i + 1;
+                const discountFactor = Math.pow(1 + discountRate, year);
+                const opStartYear = s.constructionTime + s.licensingDelay + 1;
+                
                 if (year <= s.constructionTime) {
+                    // Construction outflow (CAPEX)
                     discountedCapex += -cf / discountFactor;
-                } else if (year <= s.constructionTime + s.lifetime) {
-                    const opYear = year - s.constructionTime, costInflation = Math.pow(1 + (s.inflationRate / 100), opYear - 1);
-                    const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * (s.deploymentStrategy === 'fleet' ? 1200 : s.capacity);
+                    if (waste.capex_trigger && year === 1) {
+                         // Repository CAPEX (treated as a pure CAPEX addition at the start)
+                         discountedCapex += s.repositoryCapex * 1e9 / discountFactor;
+                    }
+                } else if (year >= opStartYear && year <= opStartYear + s.lifetime - 1) {
+                    const opYear = year - opStartYear + 1;
+                    const costInflation = Math.pow(1 + (s.inflationRate / 100), opYear - 1);
+                    
                     let currentOAndM = base.annualOAndM - annualInsurance;
                      if (s.useDecomFundToggle) {
-                        currentOAndM -= (base.initialInvestment * (s.decommissioningCost / 100) * (1 + wasteDisposalData[s.wasteDisposal].decom_modifier)) / s.lifetime;
+                        const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
+                        currentOAndM -= totalDecomCost / s.lifetime; // Remove the non-inflated decommissioning fund contribution
                     }
+                    
                     discountedOAndM += (currentOAndM * costInflation + annualInsurance) / discountFactor;
                     discountedFuel += (base.baseAnnualFuelCost * costInflation) / discountFactor;
                     totalDiscountedGeneration += base.annualGeneration / discountFactor;
+
+                    if (s.useDecomFundToggle) {
+                        const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
+                        const annualDecomPayment = totalDecomCost / s.lifetime;
+                        discountedDecommissioning += annualDecomPayment / discountFactor;
+                    }
+                } else if (year === opStartYear + s.lifetime && !s.useDecomFundToggle) {
+                    // Lump Sum Decommissioning (only if no fund used)
+                    discountedDecommissioning += -cf / discountFactor;
                 }
             });
-            
-            if (s.useDecomFundToggle) {
-                 const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + wasteDisposalData[s.wasteDisposal].decom_modifier);
-                const annualDecomPayment = totalDecomCost / s.lifetime;
-                for (let i = 1; i <= s.lifetime; i++) {
-                    discountedDecommissioning += annualDecomPayment / Math.pow(1 + discountRate, s.constructionTime + i);
-                }
-            } else {
-                 if (cashflows.length > s.constructionTime + s.lifetime) {
-                    discountedDecommissioning = -cashflows[cashflows.length - 1] / Math.pow(1 + discountRate, cashflows.length);
-                 }
-            }
 
             const lcoe = totalDiscountedGeneration > 0 ? (discountedCapex + discountedOAndM + discountedFuel + discountedDecommissioning) / totalDiscountedGeneration : 0;
 
@@ -992,6 +1108,22 @@
 
         function runSimulation() {
             readInputsToState();
+            
+            // Update UI element dependent on multiple inputs
+            elements.totalConstructionRisk.textContent = `${(Number(elements.constructionOverrun.value) + epcContractorData[elements.epcContractor.value].riskModifier + Number(elements.socialOppositionRisk.value)).toFixed(0)}%`;
+            
+            // Max Burnup calculation for display limit
+            let maxBurnup = 65;
+            if (state.enrichmentLevel > 4.5) { maxBurnup = 65 + (state.enrichmentLevel - 4.5) * 10; }
+            else if (state.enrichmentLevel < 4.5) { maxBurnup = 65 - (4.5 - state.enrichmentLevel) * 10; }
+            maxBurnup = Math.max(5, Math.min(200, maxBurnup));
+            elements.fuelBurnup.max = maxBurnup;
+            if (state.fuelBurnup > maxBurnup) {
+                elements.fuelBurnup.value = maxBurnup;
+                elements.fuelBurnupValue.textContent = `${maxBurnup} GWd/tU`;
+                state.fuelBurnup = maxBurnup;
+            }
+
             const baseParams = calculateBaseParameters(state);
             const cashflows = calculateLifetimeCashflows(state, baseParams);
             const metrics = calculateFinancialMetrics(cashflows, state, baseParams);
@@ -1035,7 +1167,6 @@
             cashflowChart.update();
         }
         
-        // --- NEW FUNCTION TO POPULATE REFERENCES ---
         function populateReferencesTab() {
             const container = elements.referencesList;
             container.innerHTML = referenceData.map(ref => `
@@ -1046,7 +1177,6 @@
                 </div>
             `).join('');
         }
-        // --- END NEW FUNCTION ---
 
         function setupEventListeners() {
             Object.values(elements).forEach(el => {
@@ -1111,6 +1241,17 @@
                 elements.decomLumpSum.style.display = e.target.checked ? 'none' : 'block';
                  runSimulation();
             });
+            
+            elements.wasteDisposal.addEventListener('change', (e) => {
+                const isLocalRepo = ['vertical', 'horizontal', 'embedded'].includes(e.target.value);
+                elements.repositoryCapexInput.style.display = isLocalRepo ? 'block' : 'none';
+                runSimulation();
+            });
+            
+            // Listener for risk elements (Construction Overrun, EPC Contractor, Social Opposition)
+            elements.constructionOverrun.addEventListener('input', runSimulation);
+            elements.socialOppositionRisk.addEventListener('input', runSimulation);
+            elements.epcContractor.addEventListener('change', runSimulation);
 
             elements.siteLocation.addEventListener('change', (e) => {
                 const coords = siteData[e.target.value].coords;
@@ -1119,9 +1260,9 @@
             });
 
             const valueUpdaters = {
-                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`,
+                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, licensingDelay: v => `${v} Yrs`, gridCurtailment: v => `${parseFloat(v).toFixed(1)}%`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`,
                 inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`,
-                fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, geopoliticalRisk: v => `${v}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`
+                fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, geopoliticalRisk: v => `${v}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`
             };
             for (const key in valueUpdaters) {
                 if(elements[key]) elements[key].addEventListener('input', e => {
@@ -1175,7 +1316,7 @@
 
         function setValues(values, isFullReset = false) {
             const valueUpdaters = {
-                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`
+                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, licensingDelay: v => `${v} Yrs`, gridCurtailment: v => `${parseFloat(v).toFixed(1)}%`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`
             };
             for (const key in values) {
                 if (elements[key]) {
@@ -1200,6 +1341,7 @@
                  elements.useDecomFundToggle.dispatchEvent(new Event('change'));
                  elements.govtSupport.dispatchEvent(new Event('change'));
                  elements.revenueModel.dispatchEvent(new Event('change'));
+                 elements.wasteDisposal.dispatchEvent(new Event('change'));
             }
         }
 
