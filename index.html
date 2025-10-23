@@ -107,7 +107,7 @@
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 28px; }
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: #4f46e5; /* indigo-600 */ }
+        input:checked + .slider { background-color: #4f46e5; } /* indigo-600 */
         input:checked + .slider:before { transform: translateX(22px); }
         #map { height: 200px; border-radius: 0.5rem; margin-top: 1rem; z-index: 1; }
     </style>
@@ -227,7 +227,7 @@
                                 <span class="slider"></span>
                             </label>
                         </div>
-                        <div id="decomLumpSum" style="display: none;">
+                        <div id="decomLumpSum">
                             <div class="flex justify-between items-center"><label for="decommissioningCost" class="block text-sm font-medium text-gray-700">Decommissioning (% CAPEX)<span class="help-icon" data-modal="decommissioningCost">(?)</span></label></div>
                             <div class="flex items-center space-x-4"><input type="range" id="decommissioningCost" min="0" max="50" value="15" class="w-full"><span id="decommissioningCostValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">15%</span></div>
                         </div>
@@ -385,24 +385,7 @@
                         </div>
                         
                         <div class="border-t pt-4 space-y-2">
-                             <h4 class="text-sm font-semibold text-slate-600">Staffing & Regulatory Cost</h4>
-                             
-                            <!-- NEW STAFFING INPUTS -->
-                            <div>
-                                <div class="flex justify-between items-center"><label for="plantStaffingLevel" class="block text-sm font-medium text-gray-700">Plant Staffing Level (% of Baseline FTE)<span class="help-icon" data-modal="plantStaffingLevel">(?)</span></label></div>
-                                <div class="flex items-center space-x-4"><input type="range" id="plantStaffingLevel" min="50" max="150" step="5" value="100" class="w-full"><span id="plantStaffingLevelValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">100%</span></div>
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center"><label for="fanrStaffingLevel" class="block text-sm font-medium text-gray-700">Regulator Staffing (FANR, % of Baseline)<span class="help-icon" data-modal="fanrStaffingLevel">(?)</span></label></div>
-                                <div class="flex items-center space-x-4"><input type="range" id="fanrStaffingLevel" min="50" max="200" step="10" value="100" class="w-full"><span id="fanrStaffingLevelValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">100%</span></div>
-                            </div>
-                            <div>
-                                <label for="avgStaffSalary" class="block text-sm font-medium text-gray-700">Average Plant Staff Salary (₱)<span class="help-icon" data-modal="avgStaffSalary">(?)</span></label>
-                                <input type="number" id="avgStaffSalary" value="3500000" min="1000000" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            <!-- END NEW STAFFING INPUTS -->
-                             
-                             <h4 class="text-sm font-semibold text-slate-600 border-t pt-4">Maintenance & Insurance</h4>
+                             <h4 class="text-sm font-semibold text-slate-600">Operations & Insurance</h4>
                             <label for="omContractor" class="block text-sm font-medium text-gray-700">O&M Contractor<span class="help-icon" data-modal="omContractor">(?)</span></label>
                             <select id="omContractor" class="w-full p-2 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
                                 <option value="generic">In-house (+0%)</option>
@@ -485,7 +468,7 @@
                         </div>
                     </div>
 
-                    <div id="economic" class="tab-content hidden py-4 space-y-4">
+                    <div id="economic" class="tab-content py-4 space-y-4">
                         <div>
                             <label for="revenueModel" class="block text-sm font-medium text-gray-700 mb-2">Revenue Model<span class="help-icon" data-modal="revenueModel">(?)</span></label>
                             <select id="revenueModel" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white text-sm">
@@ -493,7 +476,6 @@
                                 <option value="fit">Feed-in Tariff (FIT) / PSA</option>
                                 <option value="cfd">Contract for Difference (CfD)</option>
                                 <option value="auction">Auction</option>
-                                <option value="mankala">Mankala Model (Cost-of-Production)</option> <!-- NEW OPTION -->
                             </select>
                         </div>
 
@@ -540,20 +522,6 @@
                                 <input type="number" id="auctionPrice" value="5500" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
                             </div>
                         </div>
-                        
-                        <!-- NEW MANKALA INPUTS -->
-                         <div id="mankala_inputs" class="space-y-4 p-4 bg-indigo-50 rounded-lg hidden">
-                            <div>
-                                <label for="mankalaDuration" class="block text-sm font-medium text-gray-700">Contract Duration (Years)<span class="help-icon" data-modal="mankalaDuration">(?)</span></label>
-                                <input type="number" id="mankalaDuration" value="40" class="w-full p-2 mt-1 border border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <div class="flex justify-between items-center"><label for="mankalaDiscount" class="block text-sm font-medium text-gray-700">Discount/Benefit to Market Price (%)<span class="help-icon" data-modal="mankalaDiscount">(?)</span></label></div>
-                                <div class="flex items-center space-x-4"><input type="range" id="mankalaDiscount" min="0" max="30" step="1" value="15" class="w-full"><span id="mankalaDiscountValue" class="text-sm font-semibold text-indigo-700 w-16 text-right">15%</span></div>
-                                <p class="text-xs text-slate-500 mt-1">Simulates the 'at-cost' benefit versus the average WESM price.</p>
-                            </div>
-                        </div>
-                        <!-- END MANKALA INPUTS -->
 
                         <div class="border-t pt-4 space-y-4">
                              <div>
@@ -594,15 +562,6 @@
             <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                 <h2 class="text-xl font-bold mb-4 text-slate-700">Financial Analysis</h2>
                 
-                <!-- NEW ROW FOR TECHNICAL DATA -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-gray-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6 text-slate-500"><path d="M10 3a1.5 1.5 0 011.5 1.5v1A1.5 1.5 0 0110 7H4.5A1.5 1.5 0 013 5.5v-1A1.5 1.5 0 014.5 3H10zM10 9a1.5 1.5 0 011.5 1.5v1A1.5 1.5 0 0110 13H4.5A1.5 1.5 0 013 11.5v-1A1.5 1.5 0 014.5 9H10zM10 15a1.5 1.5 0 011.5 1.5v1A1.5 1.5 0 0110 19H4.5A1.5 1.5 0 013 17.5v-1A1.5 1.5 0 014.5 15H10z" /><path fill-rule="evenodd" d="M15 15a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM15 9a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM15 3a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clip-rule="evenodd" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">Gross Capacity<span class="help-icon" data-modal="capacity">(?)</span></h3><p id="grossCapacityDisplay" class="text-xl font-bold text-slate-700 mt-1">0 MWe</p></div></div>
-                    <div class="bg-gray-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6 text-slate-500"><path fill-rule="evenodd" d="M15.312 9.062A8.473 8.473 0 0118 10a8 8 0 11-1.395-4.839l-1.077 1.077A7.05 7.05 0 0010 17.5a7.5 7.5 0 01-7.5-7.5c0-3.31 2.69-6 6-6 1.83 0 3.51.8 4.673 2.062l-1.464 1.464a.5.5 0 01-.707 0l-.353-.354a.5.5 0 010-.707l1.077-1.077a8.473 8.473 0 01-1.564-1.124A.5.5 0 0111.5 2.5a.5.5 0 01.353-.147h3.8a.5.5 0 01.5.5V6.853a.5.5 0 01-.147.353zM7.5 10a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" clip-rule="evenodd" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">Annual Generation<span class="help-icon" data-modal="capacityFactor">(?)</span></h3><p id="annualGenerationDisplay" class="text-xl font-bold text-slate-700 mt-1">0 GWh</p></div></div>
-                    <div class="bg-gray-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-6 h-6 text-slate-500"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-1.876-8.995a.75.75 0 00-1.061 1.061L9.124 12a.75.75 0 001.061-1.061l-1.44-1.44zM10.876 10a.75.75 0 00-.53-1.28l-2.061 1.03a.75.75 0 00.627 1.342l1.623-.812z" clip-rule="evenodd" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">Lifetime<span class="help-icon" data-modal="lifetime">(?)</span></h3><p id="lifetimeDisplay" class="text-xl font-bold text-slate-700 mt-1">0 Yrs</p></div></div>
-                    <div class="bg-gray-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-slate-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21.75V15m0 0l-3-3m3 3l3-3M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">Total Project Risk<span class="help-icon" data-modal="constructionOverrun">(?)</span></h3><p id="totalRiskDisplay" class="text-xl font-bold text-slate-700 mt-1">0%</p></div></div>
-                </div>
-                <!-- END NEW ROW FOR TECHNICAL DATA -->
-                
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                     <div class="bg-blue-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-blue-500"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.26-6.75.77m13.5 0c-.317.02-3.21 1.4-6.75 1.4-3.437 0-6.42-1.376-6.75-1.4m13.5 0L12 12.75 5.25 4.97" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">LCOE (₱/MWh)<span class="help-icon" data-modal="lcoe">(?)</span></h3><p id="lcoe" class="text-xl font-bold text-blue-700 mt-1">₱0.00</p></div></div>
                     <div class="bg-green-50 p-4 rounded-lg flex items-start space-x-3"><div class="shrink-0"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-green-500"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /></svg></div><div><h3 class="text-xs font-medium text-slate-500">NPV (₱B)<span class="help-icon" data-modal="npv">(?)</span></h3><p id="npv" class="text-xl font-bold text-green-700 mt-1">₱0 B</p></div></div>
@@ -636,77 +595,77 @@
     </div>
 
     <script>
-        // --- NEW STAFFING CONSTANTS ---
-        const BASE_STAFF_FTE_LARGE = 500;
-        const BASE_STAFF_FTE_SMR = 200;
-        const AVG_STAFF_SALARY_PHP = 3500000; // ₱3.5M per FTE
-        const BASE_FANR_STAFF = 250; // Reference from PDF Page 6 (2019 data)
-        const AVG_REG_SALARY_PHP = 4000000; // ₱4.0M per Reg FTE (higher pay to attract talent)
-        
         // --- DATA AND CONSTANTS ---
         const DEFAULTS = {
             deploymentStrategy: 'single', fleetCapexDiscount: 15,
-            reactorType: 'ap1000', capacity: 1117, lifetime: 60, constructionTime: 7,
+            reactorType: 'apr1400', capacity: 1400, lifetime: 60, constructionTime: 8,
             discountRateManual: 8, capacityFactor: 90, inflationRate: 2, decommissioningCost: 15, constructionOverrun: 0, useDecomFundToggle: true,
-            thermalEfficiency: 34, fuelBurnup: 50, fuelSupplier: 'generic', geopoliticalRisk: 0, wasteDisposal: 'interim', repositoryCapex: 30, socialOppositionRisk: 0, licensingDelay: 0, gridCurtailment: 0,
+            thermalEfficiency: 36, fuelBurnup: 55, fuelSupplier: 'generic', geopoliticalRisk: 0, wasteDisposal: 'interim', repositoryCapex: 30, socialOppositionRisk: 0, licensingDelay: 0, gridCurtailment: 0,
             turbineSupplier: 'generic', rpvSupplier: 'generic',
             epcContractor: 'generic', omContractor: 'generic', insuranceProvider: 'generic_pool', 
             cogenerationTechnology: 'none', cogenerationRevenue: 0,
             siteLocation: 'mariveles',
             jvPartner: 'none', govtSupport: 'none', ptcValue: 580,
             debtRatio: 70, costOfEquity: 12, loanProvider: 'comm_bank', taxRate: 25, useWaccToggle: true,
-            
-            // --- UPDATED DEFAULTS ---
-            revenueModel: 'fit', // PSA/FIT new default
-            electricityPrice: 3040, priceEscalation: 1.5,
+            revenueModel: 'fit', electricityPrice: 3040, priceEscalation: 1.5,
             fitPrice: 9500, fitDuration: 20,
             cfdStrikePrice: 6200, cfdMarketPrice: 3040, cfdDuration: 25,
             auctionPrice: 5500,
             deuteriumCost: 29000000, deuteriumSource: 'foreign',
             enrichmentLevel: 4.5,
-            
-            // --- NEW STAFFING DEFAULTS ---
-            plantStaffingLevel: 100, 
-            fanrStaffingLevel: 100, 
-            avgStaffSalary: AVG_STAFF_SALARY_PHP,
-            
-            // --- NEW MANKALA DEFAULTS ---
-            mankalaDiscount: 15, // 15% discount to WESM price
-            mankalaDuration: 40,
         };
         const usdToPhpRate = 58.0;
 
-        const reactorData = { // Expanded to 32 types
-            bataan: { name: "Refurbish Bataan NPP (PWR)", type: 'large', capexPerMWe: 1612903 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 620, efficiency: 32, burnup: 40 },
-            pwr_gen2: { name: "Pressurized Water Reactor (Gen II)", type: 'large', capexPerMWe: 5500000 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
-            bwr_gen2: { name: "Boiling Water Reactor (Gen II)", type: 'large', capexPerMWe: 5700000 * usdToPhpRate, oAndMPerMWe: 85000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
-            candu: { name: "CANDU/PHWR (Gen II)", type: 'large', capexPerMWe: 6000000 * usdToPhpRate, oAndMPerMWe: 90000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 8, capacity: 700, efficiency: 31, burnup: 7 },
-            ap1000: { name: "Westinghouse AP1000 (PWR)", type: 'large', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 75000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1117, efficiency: 34, burnup: 50 },
-            epr: { name: "Framatome EPR (PWR)", type: 'large', capexPerMWe: 8500000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 12, capacity: 1650, efficiency: 37, burnup: 60 },
-            vver1200: { name: "Rosatom VVER-1200 (PWR)", type: 'large', capexPerMWe: 5000000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1200, efficiency: 36, burnup: 55 },
-            abwr: { name: "Advanced BWR (ABWR)", type: 'large', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1350, efficiency: 35, burnup: 50 },
-            apr1400: { name: "KEPCO APR-1400 (PWR)", type: 'large', capexPerMWe: 5200000 * usdToPhpRate, oAndMPerMWe: 75000 * usdToPhpRate, fuelCostPerMWh: 6.8 * usdToPhpRate, constructionTime: 6, capacity: 1400, efficiency: 36, burnup: 55 },
-            hualongone: { name: "CGN Hualong One (PWR)", type: 'large', capexPerMWe: 4500000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 6, capacity: 1150, efficiency: 37, burnup: 50 },
-            nuscale: { name: "NuScale VOYGR (PWR SMR)", type: 'smr', capexPerMWe: 10000000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 77, efficiency: 31, burnup: 50 },
-            bwrx300: { name: "GE-Hitachi BWRX-300 (BWR SMR)", type: 'smr', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 90000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 300, efficiency: 34, burnup: 50 },
-            ismr_jp: { name: "IHI i-SMR (PWR SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 95000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 5, capacity: 300, efficiency: 33, burnup: 50 },
-            rollsroyce_smr: { name: "Rolls-Royce SMR (PWR SMR)", type: 'smr', capexPerMWe: 9000000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 470, efficiency: 35, burnup: 55 },
-            ap300: { name: "Westinghouse AP300 (SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 95000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 3, capacity: 300, efficiency: 33, burnup: 50 },
-            acp100: { name: "CNNC ACP100 'Linglong One' (PWR SMR)", type: 'smr', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 7.8 * usdToPhpRate, constructionTime: 3, capacity: 125, efficiency: 32, burnup: 45 },
-            sfr: { name: "Sodium-Cooled Fast Reactor (SFR)", type: 'gen4', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 65000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 6, capacity: 500, efficiency: 42, burnup: 150 },
-            lfr: { name: "Lead-Cooled Fast Reactor (LFR)", type: 'gen4', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 6, capacity: 400, efficiency: 43, burnup: 150 },
-            msr: { name: "Molten Salt Reactor (MSR)", type: 'gen4', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 60000 * usdToPhpRate, fuelCostPerMWh: 3.5 * usdToPhpRate, constructionTime: 5, capacity: 500, efficiency: 45, burnup: 100 },
-            vhtr: { name: "Very High-Temp Reactor (VHTR)", type: 'gen4', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 75000 * usdToPhpRate, fuelCostPerMWh: 6 * usdToPhpRate, constructionTime: 7, capacity: 600, efficiency: 50, burnup: 120 },
-            scwr: { name: "Supercritical Water Reactor (SCWR)", type: 'gen4', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 6, capacity: 1000, efficiency: 45, burnup: 65 },
-            gsfr: { name: "Gas-Cooled Fast Reactor (GFR)", type: 'gen4', capexPerMWe: 7800000 * usdToPhpRate, oAndMPerMWe: 75000 * usdToPhpRate, fuelCostPerMWh: 5.5 * usdToPhpRate, constructionTime: 7, capacity: 800, efficiency: 48, burnup: 150 },
-            mcfc: { name: "Molten Chloride Fast Reactor (MCFR)", type: 'gen4', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 65000 * usdToPhpRate, fuelCostPerMWh: 4.2 * usdToPhpRate, constructionTime: 6, capacity: 600, efficiency: 46, burnup: 180 },
-            oklo_aurora: { name: "Oklo Aurora (Heat Pipe MR)", type: 'micro', capexPerMWe: 15000000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 12 * usdToPhpRate, constructionTime: 2, capacity: 1.5, efficiency: 25, burnup: 100 },
-            westinghouse_evinci: { name: "Westinghouse eVinci (Heat Pipe MR)", type: 'micro', capexPerMWe: 12000000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 11 * usdToPhpRate, constructionTime: 1, capacity: 5, efficiency: 30, burnup: 90 },
-            seaborg: { name: "Seaborg CMSR (MSR Barge)", type: 'advanced', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 65000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 3, capacity: 400, efficiency: 44, burnup: 100 },
-            terrapower_natrium: { name: "TerraPower Natrium (SFR + Storage)", type: 'advanced', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 70000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 5, capacity: 345, efficiency: 41, burnup: 160 },
-            thorcon: { name: "ThorCon (MSR Barge)", type: 'advanced', capexPerMWe: 4000000 * usdToPhpRate, oAndMPerMWe: 55000 * usdToPhpRate, fuelCostPerMWh: 3 * usdToPhpRate, constructionTime: 3, capacity: 500, efficiency: 46, burnup: 100 }
+        const reactorData = { 
+            // Legacy & Gen II/III+
+            bataan: { name: "Refurbish Bataan NPP (PWR)", type: 'large', capexPerMWe: 1612903 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 620, efficiency: 32, burnup: 40 },
+            pwr_gen2: { name: "Pressurized Water Reactor (Gen II - Mid)", type: 'large', capexPerMWe: 5500000 * usdToPhpRate, oAndMPerMWe: 140000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
+            bwr_gen2: { name: "Boiling Water Reactor (Gen II - Mid)", type: 'large', capexPerMWe: 5700000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 8, capacity: 900, efficiency: 33, burnup: 45 },
+            candu: { name: "CANDU/PHWR (Gen II)", type: 'large', capexPerMWe: 6000000 * usdToPhpRate, oAndMPerMWe: 160000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 8, capacity: 700, efficiency: 31, burnup: 7 },
+            
+            // --- Gen III+ Mid-Range/Programmatic NOAK ---
+            // APR-1400: Updated to Shin Kori NOAK Cost ($2,648/kW)
+            apr1400: { name: "KEPCO APR-1400 (Shin Kori NOAK Case)", type: 'large', capexPerMWe: 2648000 * usdToPhpRate, oAndMPerMWe: 128000 * usdToPhpRate, fuelCostPerMWh: 6.8 * usdToPhpRate, constructionTime: 8, capacity: 1400, efficiency: 36, burnup: 55 },
+            // VVER-1200: Updated to Akkuyu NOAK Cost ($5,386/kW)
+            vver1200: { name: "Rosatom VVER-1200 (Akkuyu NOAK Case)", type: 'large', capexPerMWe: 5386000 * usdToPhpRate, oAndMPerMWe: 125000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 8, capacity: 1200, efficiency: 36, burnup: 55 },
+            // AP1000 and EPR remain as original mid-range (but renamed for clarity)
+            ap1000: { name: "Westinghouse AP1000 (Mid-Range NOAK)", type: 'large', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1117, efficiency: 34, burnup: 50 },
+            epr: { name: "Framatome EPR (Mid-Range NOAK)", type: 'large', capexPerMWe: 8500000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 12, capacity: 1650, efficiency: 37, burnup: 60 },
+            abwr: { name: "Advanced BWR (ABWR)", type: 'large', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 135000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 7, capacity: 1350, efficiency: 35, burnup: 50 },
+            hualongone: { name: "CGN Hualong One (PWR)", type: 'large', capexPerMWe: 4500000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 6, capacity: 1150, efficiency: 37, burnup: 50 },
+
+            // --- Case Studies: High-Risk FOAK Western Projects ---
+            ap1000_vogtle: { name: "AP1000 (Vogtle FOAK - 15yr, $16.5k/kW)", type: 'large', capexPerMWe: 16470000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 7 * usdToPhpRate, constructionTime: 15, capacity: 1117, efficiency: 34, burnup: 50 },
+            epr_hinkley: { name: "EPR (Hinkley FOAK - 13yr, $17.2k/kW)", type: 'large', capexPerMWe: 17178000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 13, capacity: 1650, efficiency: 37, burnup: 60 },
+            
+            // --- Case Studies: Low-Cost Programmatic Asian Projects ---
+            epr_taishan: { name: "EPR (Taishan NOAK - 9yr, $3.8k/kW)", type: 'large', capexPerMWe: 3765000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 9, capacity: 1650, efficiency: 37, burnup: 60 },
+
+            // --- Historical Legacy Benchmarks (for context) ---
+            pwr_oconee: { name: "Legacy PWR (Oconee 1970s Benchmark - $1.2k/kW)", type: 'large', capexPerMWe: 1245000 * usdToPhpRate, oAndMPerMWe: 140000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 6, capacity: 850, efficiency: 33, burnup: 45 },
+            pwr_palo_verde: { name: "Legacy PWR (Palo Verde 1980s Benchmark - $4.3k/kW)", type: 'large', capexPerMWe: 4290000 * usdToPhpRate, oAndMPerMWe: 140000 * usdToPhpRate, fuelCostPerMWh: 7.5 * usdToPhpRate, constructionTime: 12, capacity: 1312, efficiency: 33, burnup: 45 },
+            pwr_civaux: { name: "Legacy PWR (Civaux 1990s Benchmark - $1.8k/kW)", type: 'large', capexPerMWe: 1840000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 6.5 * usdToPhpRate, constructionTime: 9, capacity: 1495, efficiency: 37, burnup: 60 },
+
+            // SMR, Gen IV, Micro, Advanced remain the same
+            nuscale: { name: "NuScale VOYGR (PWR SMR)", type: 'smr', capexPerMWe: 10000000 * usdToPhpRate, oAndMPerMWe: 180000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 77, efficiency: 31, burnup: 50 },
+            bwrx300: { name: "GE-Hitachi BWRX-300 (BWR SMR)", type: 'smr', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 160000 * usdToPhpRate, fuelCostPerMWh: 8 * usdToPhpRate, constructionTime: 4, capacity: 300, efficiency: 34, burnup: 50 },
+            ismr_jp: { name: "IHI i-SMR (PWR SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 165000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 5, capacity: 300, efficiency: 33, burnup: 50 },
+            rollsroyce_smr: { name: "Rolls-Royce SMR (PWR SMR)", type: 'smr', capexPerMWe: 9000000 * usdToPhpRate, oAndMPerMWe: 170000 * usdToPhpRate, fuelCostPerMWh: 9 * usdToPhpRate, constructionTime: 4, capacity: 470, efficiency: 35, burnup: 55 },
+            ap300: { name: "Westinghouse AP300 (SMR)", type: 'smr', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 170000 * usdToPhpRate, fuelCostPerMWh: 8.5 * usdToPhpRate, constructionTime: 3, capacity: 300, efficiency: 33, burnup: 50 },
+            acp100: { name: "CNNC ACP100 'Linglong One' (PWR SMR)", type: 'smr', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 150000 * usdToPhpRate, fuelCostPerMWh: 7.8 * usdToPhpRate, constructionTime: 3, capacity: 125, efficiency: 32, burnup: 45 },
+            sfr: { name: "Sodium-Cooled Fast Reactor (SFR)", type: 'gen4', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 110000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 6, capacity: 500, efficiency: 42, burnup: 150 },
+            lfr: { name: "Lead-Cooled Fast Reactor (LFR)", type: 'gen4', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 115000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 6, capacity: 400, efficiency: 43, burnup: 150 },
+            msr: { name: "Molten Salt Reactor (MSR)", type: 'gen4', capexPerMWe: 6500000 * usdToPhpRate, oAndMPerMWe: 90000 * usdToPhpRate, fuelCostPerMWh: 3.5 * usdToPhpRate, constructionTime: 5, capacity: 500, efficiency: 45, burnup: 100 },
+            vhtr: { name: "Very High-Temp Reactor (VHTR)", type: 'gen4', capexPerMWe: 8000000 * usdToPhpRate, oAndMPerMWe: 130000 * usdToPhpRate, fuelCostPerMWh: 6 * usdToPhpRate, constructionTime: 7, capacity: 600, efficiency: 50, burnup: 120 },
+            scwr: { name: "Supercritical Water Reactor (SCWR)", type: 'gen4', capexPerMWe: 6800000 * usdToPhpRate, oAndMPerMWe: 120000 * usdToPhpRate, fuelCostPerMWh: 5 * usdToPhpRate, constructionTime: 6, capacity: 1000, efficiency: 45, burnup: 65 },
+            gsfr: { name: "Gas-Cooled Fast Reactor (GFR)", type: 'gen4', capexPerMWe: 7800000 * usdToPhpRate, oAndMPerMWe: 125000 * usdToPhpRate, fuelCostPerMWh: 5.5 * usdToPhpRate, constructionTime: 7, capacity: 800, efficiency: 48, burnup: 150 },
+            mcfc: { name: "Molten Chloride Fast Reactor (MCFR)", type: 'gen4', capexPerMWe: 7500000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 4.2 * usdToPhpRate, constructionTime: 6, capacity: 600, efficiency: 46, burnup: 180 },
+            oklo_aurora: { name: "Oklo Aurora (Heat Pipe MR)", type: 'micro', capexPerMWe: 15000000 * usdToPhpRate, oAndMPerMWe: 250000 * usdToPhpRate, fuelCostPerMWh: 12 * usdToPhpRate, constructionTime: 2, capacity: 1.5, efficiency: 25, burnup: 100 },
+            westinghouse_evinci: { name: "Westinghouse eVinci (Heat Pipe MR)", type: 'micro', capexPerMWe: 12000000 * usdToPhpRate, oAndMPerMWe: 220000 * usdToPhpRate, fuelCostPerMWh: 11 * usdToPhpRate, constructionTime: 1, capacity: 5, efficiency: 30, burnup: 90 },
+            seaborg: { name: "Seaborg CMSR (MSR Barge)", type: 'advanced', capexPerMWe: 7000000 * usdToPhpRate, oAndMPerMWe: 100000 * usdToPhpRate, fuelCostPerMWh: 4 * usdToPhpRate, constructionTime: 3, capacity: 400, efficiency: 44, burnup: 100 },
+            terrapower_natrium: { name: "TerraPower Natrium (SFR + Storage)", type: 'advanced', capexPerMWe: 7200000 * usdToPhpRate, oAndMPerMWe: 110000 * usdToPhpRate, fuelCostPerMWh: 4.5 * usdToPhpRate, constructionTime: 5, capacity: 345, efficiency: 41, burnup: 160 },
+            thorcon: { name: "ThorCon (MSR Barge)", type: 'advanced', capexPerMWe: 4000000 * usdToPhpRate, oAndMPerMWe: 80000 * usdToPhpRate, fuelCostPerMWh: 3 * usdToPhpRate, constructionTime: 3, capacity: 500, efficiency: 46, burnup: 100 }
         };
-        // NOTE: oAndMPerMWe is now assumed to be non-staff related O&M, not total.
         
         const fuelSupplierData = { // Expanded to 31 options
             generic: { surcharge: 0.00 }, rosatom_tvel: { surcharge: -0.10 }, orano: { surcharge: 0.02 }, cgn_cnnc: { surcharge: -0.03 }, kepco: { surcharge: 0.04 }, westinghouse: { surcharge: 0.07 },
@@ -821,7 +780,7 @@
             concepcion: { name: "Brgy. Concepcion, Palawan", coords: [10.25, 119.33], seismicModifier: 0.01, gridModifier: 0.07, laborModifier: -0.03 },
             cagayan: { name: "Aparri, Cagayan (North)", coords: [18.35, 121.77], seismicModifier: 0.03, gridModifier: 0.05, laborModifier: -0.05 },
             cebu: { name: "Toledo City, Cebu", coords: [10.38, 123.63], seismicModifier: 0.06, gridModifier: 0.02, laborModifier: 0.05 },
-            davnor: { name: "Davao Gulf Area", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
+            davnor: { name: "Davao Gulf Area (Mindanao)", coords: [7.55, 125.80], seismicModifier: 0.08, gridModifier: 0.04, laborModifier: 0.00 }
         };
         
         // --- NEW REFERENCES DATA STRUCTURE ---
@@ -835,8 +794,7 @@
             { id: 7, type: "Component Premiums", source: "Proprietary Industry Benchmarks & OEM Public Data", note: "Supplier-specific CAPEX modifiers for Turbine, RPV, and EPC based on relative market perception of cost/risk." },
             { id: 8, type: "WESM Price Update", source: "IEMOP Data, September 2025", note: "Updated Base Electricity Price (₱/MWh) to the Sept 2025 system-wide average spot price (₱3,040/MWh)." },
             { id: 9, type: "Regulatory/Social Risk", source: "Conceptual Risk Model", note: "Models project delays and cost increases due to non-technical, political, or social opposition factors." },
-            { id: 10, type: "Staffing & FANR Costs", source: "IAEA-TECDOC-1808 / UAE FANR Case Study (PDF Page 6)", note: "Baseline FTE assumptions for plant operation and regulatory oversight (FANR). Regulator cost is modeled as an O&M pass-through cost." },
-            { id: 11, type: "Mankala Model", source: "PDF Page 4: Revenue Models", note: "The Mankala price is simulated as a discount to the wholesale market price, representing the 'at-cost' benefit to co-op owners." }
+            { id: 10, type: "Project Case Studies & Cost Benchmarks", source: "Global Nuclear Power Project Costs: A Comparative Case Study Analysis of Success, Failure, and Systemic Risk (2025)", note: "Incorporated specific 'First-of-a-Kind' (FOAK) and 'Nth-of-a-Kind' (NOAK) construction costs and timelines for AP1000, EPR, and APR-1400 designs (Table 2 data, converted to PHP/MWe)." }
         ];
 
         const modalInfo = {
@@ -855,9 +813,6 @@
             capacityFactor: { title: "Capacity Factor (%)", text: "The ratio of the plant's actual electricity output over a year to its maximum possible output. A high capacity factor (typically >90% for nuclear) is crucial for economic performance as it maximizes revenue from the fixed investment." },
             gridCurtailment: { title: "Grid Curtailment Risk (%)", text: "The percentage of generated energy that cannot be delivered to the grid due to infrastructure bottlenecks or stability issues. This directly reduces annual revenue." },
             thermalEfficiency: { title: "Thermal Efficiency (%)", text: "The percentage of thermal energy (heat) generated by the reactor that is converted into electrical energy. Higher efficiency means more electricity is produced for the same amount of fuel, reducing fuel costs." },
-            plantStaffingLevel: { title: "Plant Staffing Level (% of Baseline FTE)", text: "Adjusts the number of Full-Time Equivalent (FTE) personnel needed to run the plant (Baseline: 500 for large, 200 for SMRs). Higher staffing increases annual O&M cost." },
-            fanrStaffingLevel: { title: "Regulator Staffing (FANR, % of Baseline)", text: "Adjusts the assumed cost of the Federal Authority for Nuclear Regulation (FANR) oversight, which is often paid by the operator. Baseline is 250 FTE (similar to UAE case study)."},
-            avgStaffSalary: { title: "Average Plant Staff Salary (₱)", text: "The average annual cost (salary + benefits) per plant employee. This parameter localizes O&M cost significantly."},
             fuelBurnup: { title: "Fuel Burnup (GWd/tU)", text: "A measure of the total energy extracted from a given mass of nuclear fuel. Higher burnup indicates more efficient fuel use." },
             enrichmentLevel: { title: "Initial Uranium Enrichment (%)", text: "The U-235 concentration in the fuel. Higher enrichment enables higher maximum fuel burnup (capped at 65 GWd/tU for standard fuel in this model)." },
             fuelSupplier: { title: "Fuel Cycle Supplier", text: "The company or entity supplying the nuclear fuel. The choice affects fuel cost due to different pricing, technologies, and geopolitical factors." },
@@ -867,7 +822,7 @@
             wasteDisposal: { title: "Waste Disposal Strategy", text: "The long-term plan for managing spent nuclear fuel. This impacts long-term O&M and/or decommissioning costs." },
             repositoryCapex: { title: "Repository CAPEX (₱B)", text: "The initial investment required to construct a local geological repository for spent fuel, applicable only when a local disposal option is selected." },
             socialOppositionRisk: { title: "Social Opposition/Litigation Risk (%)", text: "A non-technical risk factor applied as a modifier to the total initial project CAPEX, primarily covering costs associated with social unrest, protests, legal challenges, and community programs." },
-            revenueModel: { title: "Revenue Model", text: "The mechanism for selling electricity. This determines revenue stability and predictability. WESM is the spot market. FIT/PSA/Auction provide fixed prices, while CfD provides a price floor via a 'strike price'. The Mankala model is a cost-of-production structure." },
+            revenueModel: { title: "Revenue Model", text: "The mechanism for selling electricity. This determines revenue stability and predictability. WESM is the spot market. FIT/PSA/Auction provide fixed prices, while CfD provides a price floor via a 'strike price'." },
             electricityPrice: { title: "Base Electricity Price (₱/MWh)", text: "The starting price received for each Megawatt-hour of electricity sold to the grid (WESM average as of Sept 2025)." },
             priceEscalation: { title: "Price Escalation (%/yr)", text: "The expected annual percentage increase in the electricity price over the plant's lifetime." },
             inflationRate: { title: "Cost Inflation (%/yr)", text: "The expected annual percentage increase in the plant's operational costs (O&M) and fuel costs." },
@@ -879,8 +834,6 @@
             insuranceProvider: { title: "Insurance Provider", text: "Nuclear liability insurance provider. Affects O&M costs." },
             cogenerationTechnology: { title: "Co-generation Technology", text: "The use of 'waste' heat for industrial or community applications, providing extra revenue." },
             cogenerationRevenue: { title: "Co-generation Revenue", text: "Annual revenue from non-electricity products (e.g., desalinated water, hydrogen)." },
-            mankalaDiscount: { title: "Mankala Discount/Benefit (%)", text: "The percentage discount below the Wholesale Electricity Spot Market (WESM) price that the co-op owners receive. This represents the financial benefit of the Mankala structure over standard power purchase." },
-            mankalaDuration: { title: "Mankala Contract Duration (Years)", text: "The length of the at-cost power supply agreement under the Mankala cooperative model. After this period, the plant defaults to WESM pricing." },
             lcoe: { title: "Levelized Cost of Energy (LCOE)", text: "The average revenue per unit of electricity generated required to recover all costs over the project's life. Best measure for comparing generation costs." },
             npv: { title: "Net Present Value (NPV)", text: "The discounted value of all future cash flows. A positive NPV indicates a profitable project at the given discount rate." },
             irr: { title: "Internal Rate of Return (IRR)", text: "The discount rate at which the NPV equals zero. If IRR > Discount Rate, the project is worthwhile." },
@@ -898,9 +851,7 @@
         const elements = {
             deploymentStrategy: document.getElementById('deploymentStrategy'), smrFleetOptions: document.getElementById('smrFleetOptions'), smrFleetSummary: document.getElementById('smrFleetSummary'), fleetCapexDiscount: document.getElementById('fleetCapexDiscount'), fleetCapexDiscountValue: document.getElementById('fleetCapexDiscountValue'),
             reactorType: document.getElementById('reactorType'), capacity: document.getElementById('capacity'), lifetime: document.getElementById('lifetime'), constructionTime: document.getElementById('constructionTime'), licensingDelay: document.getElementById('licensingDelay'), licensingDelayValue: document.getElementById('licensingDelayValue'), gridCurtailment: document.getElementById('gridCurtailment'), gridCurtailmentValue: document.getElementById('gridCurtailmentValue'), discountRateManual: document.getElementById('discountRateManual'), capacityFactor: document.getElementById('capacityFactor'), inflationRate: document.getElementById('inflationRate'), decommissioningCost: document.getElementById('decommissioningCost'), useDecomFundToggle: document.getElementById('useDecomFundToggle'), decomLumpSum: document.getElementById('decomLumpSum'), constructionOverrun: document.getElementById('constructionOverrun'), thermalEfficiency: document.getElementById('thermalEfficiency'), fuelBurnup: document.getElementById('fuelBurnup'), fuelSupplier: document.getElementById('fuelSupplier'), geopoliticalRisk: document.getElementById('geopoliticalRisk'), geopoliticalRiskValue: document.getElementById('geopoliticalRiskValue'), wasteDisposal: document.getElementById('wasteDisposal'), deuteriumSection: document.getElementById('deuteriumSection'), deuteriumCost: document.getElementById('deuteriumCost'), deuteriumSource: document.getElementById('deuteriumSource'), repositoryCapex: document.getElementById('repositoryCapex'), repositoryCapexInput: document.getElementById('repositoryCapexInput'), socialOppositionRisk: document.getElementById('socialOppositionRisk'), socialOppositionRiskValue: document.getElementById('socialOppositionRiskValue'), totalConstructionRisk: document.getElementById('totalConstructionRisk'),
-            revenueModel: document.getElementById('revenueModel'), market_inputs: document.getElementById('market_inputs'), fit_inputs: document.getElementById('fit_inputs'), cfd_inputs: document.getElementById('cfd_inputs'), auction_inputs: document.getElementById('auction_inputs'), mankala_inputs: document.getElementById('mankala_inputs'), // NEW MANKALA INPUTS
-            mankalaDiscount: document.getElementById('mankalaDiscount'), mankalaDiscountValue: document.getElementById('mankalaDiscountValue'), mankalaDuration: document.getElementById('mankalaDuration'),
-            plantStaffingLevel: document.getElementById('plantStaffingLevel'), plantStaffingLevelValue: document.getElementById('plantStaffingLevelValue'), fanrStaffingLevel: document.getElementById('fanrStaffingLevel'), fanrStaffingLevelValue: document.getElementById('fanrStaffingLevelValue'), avgStaffSalary: document.getElementById('avgStaffSalary'), // NEW STAFFING INPUTS
+            revenueModel: document.getElementById('revenueModel'), market_inputs: document.getElementById('market_inputs'), fit_inputs: document.getElementById('fit_inputs'), cfd_inputs: document.getElementById('cfd_inputs'), auction_inputs: document.getElementById('auction_inputs'),
             electricityPrice: document.getElementById('electricityPrice'), priceEscalation: document.getElementById('priceEscalation'), priceEscalationValue: document.getElementById('priceEscalationValue'),
             fitPrice: document.getElementById('fitPrice'), fitDuration: document.getElementById('fitDuration'),
             cfdStrikePrice: document.getElementById('cfdStrikePrice'), cfdMarketPrice: document.getElementById('cfdMarketPrice'), cfdDuration: document.getElementById('cfdDuration'),
@@ -916,13 +867,7 @@
             capacityFactorValue: document.getElementById('capacityFactorValue'), inflationRateValue: document.getElementById('inflationRateValue'), decommissioningCostValue: document.getElementById('decommissioningCostValue'), constructionOverrunValue: document.getElementById('constructionOverrunValue'), thermalEfficiencyValue: document.getElementById('thermalEfficiencyValue'), fuelBurnupValue: document.getElementById('fuelBurnupValue'), 
             enrichmentLevel: document.getElementById('enrichmentLevel'), enrichmentLevelValue: document.getElementById('enrichmentLevelValue'),
             lcoe: document.getElementById('lcoe'), npv: document.getElementById('npv'), irr: document.getElementById('irr'), payback: document.getElementById('payback'),
-            referencesList: document.getElementById('referencesList'),
-            
-            // NEW DISPLAY ELEMENTS
-            grossCapacityDisplay: document.getElementById('grossCapacityDisplay'),
-            annualGenerationDisplay: document.getElementById('annualGenerationDisplay'),
-            lifetimeDisplay: document.getElementById('lifetimeDisplay'),
-            totalRiskDisplay: document.getElementById('totalRiskDisplay')
+            referencesList: document.getElementById('referencesList')
         };
         
         let costChart, cashflowChart, map;
@@ -1010,30 +955,10 @@
             
             const annualGeneration = currentCapacity * 24 * 365 * effectiveCapacityFactor * effectiveGenerationFactor;
             
-            // --- NEW STAFFING COST CALCULATION ---
-            const isLarge = reactorData[s.reactorType].type === 'large';
-            const baseStaffFTE = isLarge ? BASE_STAFF_FTE_LARGE : BASE_STAFF_FTE_SMR;
-            const plantStaffFTE = baseStaffFTE * (s.plantStaffingLevel / 100);
-            const regulatorStaffFTE = BASE_FANR_STAFF * (s.fanrStaffingLevel / 100);
-
-            const explicitPlantStaffCost = plantStaffFTE * s.avgStaffSalary;
-            const explicitRegulatorCost = regulatorStaffFTE * AVG_REG_SALARY_PHP;
-            
-            // Non-staff O&M base (assumed to be covered by oAndMPerMWe)
-            const nonStaffOAndM = data.oAndMPerMWe * currentCapacity;
-
-            // Total Annual O&M before inflation and decom payment
-            let baseOAndM = (
-                nonStaffOAndM * (1 + omModifier + site.laborModifier + waste.oAndM_modifier) +
-                explicitPlantStaffCost +
-                explicitRegulatorCost
-            );
-
-            // Insurance (fixed/staff-independent)
+            let baseOAndM = data.oAndMPerMWe * currentCapacity * (1 + omModifier + site.laborModifier + waste.oAndM_modifier);
             const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * currentCapacity;
             baseOAndM += annualInsurance;
-            
-            // Decom Fund Payment
+
             const totalDecomCost = initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
             const annualDecomFundPayment = s.useDecomFundToggle ? totalDecomCost / s.lifetime : 0;
             baseOAndM += annualDecomFundPayment;
@@ -1041,14 +966,13 @@
             return {
                 initialInvestment,
                 annualConstructionCost: initialInvestment / s.constructionTime,
-                annualOAndM: baseOAndM, // Includes staff, non-staff, insurance, and decom fund (if used)
+                annualOAndM: baseOAndM,
                 annualGeneration,
                 baseAnnualFuelCost: data.fuelCostPerMWh * annualGeneration * fuelCostModifier,
                 decommissioningCost: s.useDecomFundToggle ? 0 : totalDecomCost,
                 annualCarbonRevenue: annualGeneration * 0.9 * s.carbonPrice,
                 annualCogenerationRevenue: s.cogenerationRevenue * 1e6,
-                ptcBonus: (s.govtSupport === 'ptc') ? s.ptcValue : 0,
-                currentCapacity
+                ptcBonus: (s.govtSupport === 'ptc') ? s.ptcValue : 0
             };
         }
 
@@ -1057,7 +981,7 @@
             const totalPreOpTime = s.constructionTime + s.licensingDelay;
             
             // Construction costs are spread over s.constructionTime years, starting at Year 1.
-            let cashflows = Array(totalPreOpTime + s.lifetime).fill(0);
+            let cashflows = Array(totalPreOpTime).fill(0);
             const constructionCostPerYear = base.initialInvestment / s.constructionTime;
             
             // 1. Initial CAPEX outflow during construction period (Years 1 to s.constructionTime)
@@ -1072,45 +996,30 @@
                 const costInflation = Math.pow(1 + (s.inflationRate / 100), i - 1);
                 let revenueForYear = 0;
                 
-                // Calculate market price for this year
-                const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - 1);
-                const currentMarketPrice = s.electricityPrice * marketPriceInflation;
-
                 switch(s.revenueModel) {
                     case 'market':
-                         revenueForYear = (currentMarketPrice + base.ptcBonus) * base.annualGeneration;
+                         const priceInflation = Math.pow(1 + (s.priceEscalation / 100), i - 1);
+                         revenueForYear = (s.electricityPrice + base.ptcBonus) * priceInflation * base.annualGeneration;
                          break;
                     case 'fit':
                         if (i <= s.fitDuration) {
                             revenueForYear = (s.fitPrice + base.ptcBonus) * base.annualGeneration;
                         } else {
-                            const marketPriceAfterContract = Math.pow(1 + (s.priceEscalation / 100), i - s.fitDuration);
-                            revenueForYear = (s.electricityPrice * marketPriceAfterContract + base.ptcBonus) * base.annualGeneration;
+                            const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - s.fitDuration);
+                            revenueForYear = (s.electricityPrice * marketPriceInflation + base.ptcBonus) * base.annualGeneration;
                         }
                         break;
                      case 'cfd':
                         if (i <= s.cfdDuration) {
-                            const currentRefPrice = s.cfdMarketPrice * marketPriceInflation;
-                            const payment = (s.cfdStrikePrice - currentRefPrice) * base.annualGeneration;
-                            revenueForYear = (currentRefPrice + base.ptcBonus) * base.annualGeneration + payment;
+                            const payment = (s.cfdStrikePrice - s.cfdMarketPrice) * base.annualGeneration;
+                            revenueForYear = (s.cfdMarketPrice + base.ptcBonus) * base.annualGeneration + payment;
                         } else {
-                            const marketPriceAfterContract = Math.pow(1 + (s.priceEscalation / 100), i - s.cfdDuration);
-                            revenueForYear = (s.electricityPrice * marketPriceAfterContract + base.ptcBonus) * base.annualGeneration;
+                            const marketPriceInflation = Math.pow(1 + (s.priceEscalation / 100), i - s.cfdDuration);
+                            revenueForYear = (s.electricityPrice * marketPriceInflation + base.ptcBonus) * base.annualGeneration;
                         }
                         break;
                     case 'auction':
                         revenueForYear = (s.auctionPrice + base.ptcBonus) * base.annualGeneration;
-                        break;
-                    case 'mankala':
-                        // Mankala: Revenue = Market Price * (1 - Discount) for contract duration
-                        if (i <= s.mankalaDuration) {
-                            const mankalaPrice = currentMarketPrice * (1 - s.mankalaDiscount / 100);
-                            revenueForYear = (mankalaPrice + base.ptcBonus) * base.annualGeneration;
-                        } else {
-                            // After contract expires, defaults to WESM
-                            const marketPriceAfterContract = Math.pow(1 + (s.priceEscalation / 100), i - s.mankalaDuration);
-                            revenueForYear = (s.electricityPrice * marketPriceAfterContract + base.ptcBonus) * base.annualGeneration;
-                        }
                         break;
                 }
                 
@@ -1164,10 +1073,8 @@
             let discountedCapex = 0, discountedOAndM = 0, discountedFuel = 0, discountedDecommissioning = 0;
             
             const waste = wasteDisposalData[s.wasteDisposal];
-            const currentCapacity = s.deploymentStrategy === 'fleet' ? 1200 : s.capacity;
-            const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * currentCapacity;
+            const annualInsurance = insuranceData[s.insuranceProvider].premiumPerMWe * (s.deploymentStrategy === 'fleet' ? 1200 : s.capacity);
 
-            // Recalculate component costs by discounting the constituent parts of the annual O&M
             cashflows.forEach((cf, i) => {
                 const year = i + 1;
                 const discountFactor = Math.pow(1 + discountRate, year);
@@ -1180,48 +1087,24 @@
                     const opYear = year - opStartYear + 1;
                     const costInflation = Math.pow(1 + (s.inflationRate / 100), opYear - 1);
                     
-                    // --- Staffing/Regulator/Non-Staff O&M Recalculation ---
-                    const data = reactorData[s.reactorType];
-                    const omModifier = oAndMContractorData[s.omContractor].oAndMModifier;
-                    const site = siteData[s.siteLocation];
-
-                    const isLarge = data.type === 'large';
-                    const baseStaffFTE = isLarge ? BASE_STAFF_FTE_LARGE : BASE_STAFF_FTE_SMR;
-                    const plantStaffFTE = baseStaffFTE * (s.plantStaffingLevel / 100);
-                    const regulatorStaffFTE = BASE_FANR_STAFF * (s.fanrStaffingLevel / 100);
-
-                    const explicitPlantStaffCost = plantStaffFTE * s.avgStaffSalary;
-                    const explicitRegulatorCost = regulatorStaffFTE * AVG_REG_SALARY_PHP;
-                    const nonStaffOAndM = data.oAndMPerMWe * currentCapacity;
-                    
-                    let currentOAndM = (
-                        nonStaffOAndM * (1 + omModifier + site.laborModifier + waste.oAndM_modifier) +
-                        explicitPlantStaffCost +
-                        explicitRegulatorCost +
-                        annualInsurance // Insurance is O&M
-                    );
-
-                    // If decom fund is used, subtract the non-inflated annual decom payment from O&M to avoid double counting, as it is tracked separately.
-                    let annualDecomPaymentForFund = 0;
+                    let currentOAndM = base.annualOAndM - annualInsurance;
                      if (s.useDecomFundToggle) {
                         const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
-                        annualDecomPaymentForFund = totalDecomCost / s.lifetime;
-                        currentOAndM -= annualDecomPaymentForFund;
+                        // The base.annualOAndM already includes the non-inflated annual Decom Fund contribution.
+                        // We need to exclude the fund payment portion from the calculated O&M to avoid double counting if the fund is used.
+                        currentOAndM -= totalDecomCost / s.lifetime;
                     }
-
-                    // Total O&M (excluding decom fund payment) discounted
-                    discountedOAndM += (currentOAndM * costInflation) / discountFactor;
                     
-                    // Fuel discounted
+                    discountedOAndM += (currentOAndM * costInflation + annualInsurance) / discountFactor;
                     discountedFuel += (base.baseAnnualFuelCost * costInflation) / discountFactor;
-                    
-                    // Decommissioning discounted
-                    if (s.useDecomFundToggle) {
-                        discountedDecommissioning += (annualDecomPaymentForFund * costInflation) / discountFactor;
-                    }
-                    
                     totalDiscountedGeneration += base.annualGeneration / discountFactor;
 
+                    if (s.useDecomFundToggle) {
+                        // Decommissioning cost is represented by the discounted value of the annual fund contribution
+                        const totalDecomCost = base.initialInvestment * (s.decommissioningCost / 100) * (1 + waste.decom_modifier);
+                        const annualDecomPayment = totalDecomCost / s.lifetime;
+                        discountedDecommissioning += annualDecomPayment / discountFactor;
+                    }
                 } else if (year === opStartYear + s.lifetime && !s.useDecomFundToggle) {
                     // Lump Sum Decommissioning (only if no fund used)
                     discountedDecommissioning += -cf / discountFactor;
@@ -1234,7 +1117,8 @@
                  discountedCapex += s.repositoryCapex * 1e9 / firstYearDiscountFactor;
             }
             
-            // Recalculate LCOE based on discounted costs/generation
+            // Note: The IDC factor is embedded within the initialInvestment calculation, so it is already included in discountedCapex as part of the total construction outflow.
+
             const lcoe = totalDiscountedGeneration > 0 ? (discountedCapex + discountedOAndM + discountedFuel + discountedDecommissioning) / totalDiscountedGeneration : 0;
 
             return {
@@ -1250,22 +1134,11 @@
 
         // --- UI AND EVENT HANDLING ---
 
-        // NEW FUNCTION TO UPDATE TECHNICAL DISPLAYS
-        function updateTechnicalDisplays(baseParams, state) {
-            const currentCapacity = baseParams.currentCapacity;
-            const annualGWh = baseParams.annualGeneration / 1000;
-            
-            elements.grossCapacityDisplay.textContent = `${currentCapacity.toFixed(0)} MWe`;
-            elements.annualGenerationDisplay.textContent = `${annualGWh.toLocaleString('en-US', { maximumFractionDigits: 0 })} GWh`;
-            elements.lifetimeDisplay.textContent = `${state.lifetime} Yrs`;
-            
-            const epc = epcContractorData[elements.epcContractor.value];
-            const totalRisk = (Number(elements.constructionOverrun.value) + epc.riskModifier + Number(elements.socialOppositionRisk.value)).toFixed(0);
-            elements.totalRiskDisplay.textContent = `${totalRisk}%`;
-        }
-
         function runSimulation() {
             readInputsToState();
+            
+            // Update UI element dependent on multiple inputs
+            elements.totalConstructionRisk.textContent = `${(Number(elements.constructionOverrun.value) + epcContractorData[elements.epcContractor.value].riskModifier + Number(elements.socialOppositionRisk.value)).toFixed(0)}%`;
             
             // Max Burnup calculation for display limit
             let maxBurnup = 65;
@@ -1282,10 +1155,7 @@
             const baseParams = calculateBaseParameters(state);
             const cashflows = calculateLifetimeCashflows(state, baseParams);
             const metrics = calculateFinancialMetrics(cashflows, state, baseParams);
-            
-            // Update all displays
             updateUIDisplays(metrics, cashflows);
-            updateTechnicalDisplays(baseParams, state);
         }
         
         function readInputsToState() {
@@ -1359,14 +1229,14 @@
                     const firstSMR = Object.keys(reactorData).find(k => reactorData[k].type === 'smr');
                     elements.reactorType.value = firstSMR;
                 } else {
-                     elements.reactorType.value = 'ap1000'; // Default large reactor
+                     elements.reactorType.value = 'apr1400'; // Default large reactor is now APR-1400 NOAK
                 }
                 setDefaultsForReactor(elements.reactorType.value);
                 runSimulation();
             });
 
             elements.revenueModel.addEventListener('change', (e) => {
-                ['market_inputs', 'fit_inputs', 'cfd_inputs', 'auction_inputs', 'mankala_inputs'].forEach(id => {
+                ['market_inputs', 'fit_inputs', 'cfd_inputs', 'auction_inputs'].forEach(id => {
                     document.getElementById(id).style.display = 'none';
                 });
                 document.getElementById(e.target.value + '_inputs').style.display = 'block';
@@ -1420,8 +1290,7 @@
             const valueUpdaters = {
                 capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, licensingDelay: v => `${v} Yrs`, gridCurtailment: v => `${parseFloat(v).toFixed(1)}%`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`,
                 inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`,
-                fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, geopoliticalRisk: v => `${v}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`,
-                plantStaffingLevel: v => `${v}%`, fanrStaffingLevel: v => `${v}%`, mankalaDiscount: v => `${v}%` // NEW STAFFING/MANKALA
+                fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, geopoliticalRisk: v => `${v}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`
             };
             for (const key in valueUpdaters) {
                 if(elements[key]) elements[key].addEventListener('input', e => {
@@ -1475,7 +1344,7 @@
 
         function setValues(values, isFullReset = false) {
             const valueUpdaters = {
-                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, licensingDelay: v => `${v} Yrs`, gridCurtailment: v => `${parseFloat(v).toFixed(1)}%`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`, plantStaffingLevel: v => `${v}%`, fanrStaffingLevel: v => `${v}%`, mankalaDiscount: v => `${v}%`
+                capacity: v => `${v} MWe`, lifetime: v => `${v} Yrs`, constructionTime: v => `${v} Yrs`, licensingDelay: v => `${v} Yrs`, gridCurtailment: v => `${parseFloat(v).toFixed(1)}%`, discountRateManual: v => `${parseFloat(v).toFixed(1)}%`, capacityFactor: v => `${v}%`, inflationRate: v => `${parseFloat(v).toFixed(1)}%`, decommissioningCost: v => `${v}%`, constructionOverrun: v => `${v}%`, thermalEfficiency: v => `${parseFloat(v).toFixed(1)}%`, fuelBurnup: v => `${v} GWd/tU`, priceEscalation: v => `${parseFloat(v).toFixed(1)}%`, debtRatio: v => `${v}%`, costOfEquity: v => `${parseFloat(v).toFixed(1)}%`, fleetCapexDiscount: v => `${v}%`, geopoliticalRisk: v => `${v}%`, socialOppositionRisk: v => `${v}%`, enrichmentLevel: v => `${parseFloat(v).toFixed(1)}%`
             };
             for (const key in values) {
                 if (elements[key]) {
@@ -1529,7 +1398,8 @@
             reactorEl.innerHTML = ''; // Clear existing options
 
             const categories = {
-                large: 'Legacy & Gen II/III+',
+                large: 'Large Reactors (Gen II/III+)',
+                legacy: 'Legacy Benchmarks (Historical Context)',
                 smr: 'Small Modular Reactors (SMRs)',
                 gen4: 'Gen IV (Future Concepts)',
                 micro: 'Microreactors',
@@ -1539,29 +1409,39 @@
             const reactorGroups = {};
             for (const id in reactorData) {
                 const reactor = reactorData[id];
-                if (!reactorGroups[reactor.type]) {
-                    reactorGroups[reactor.type] = [];
+                let groupType = reactor.type;
+                
+                // Custom grouping for large reactors
+                if (reactor.type === 'large') {
+                    if (id.includes('legacy') || id.includes('oconee') || id.includes('palo_verde') || id.includes('civaux')) {
+                        groupType = 'legacy';
+                    }
                 }
-                reactorGroups[reactor.type].push({ id, name: reactor.name });
+
+                if (!reactorGroups[groupType]) {
+                    reactorGroups[groupType] = [];
+                }
+                reactorGroups[groupType].push({ id, name: reactor.name });
             }
 
-            for (const type in reactorGroups) {
+            for (const type in categories) {
                 // Fleet mode should ONLY show SMRs
                 if (isFleet && type !== 'smr') continue;
 
                 // Single Plant mode should show large-scale reactors, not SMRs or Microreactors
                 if (!isFleet && (type === 'smr' || type === 'micro')) continue;
-
-
-                const optgroup = document.createElement('optgroup');
-                optgroup.label = categories[type] || 'Other';
-                reactorGroups[type].forEach(reactor => {
-                    const option = document.createElement('option');
-                    option.value = reactor.id;
-                    option.textContent = reactor.name;
-                    optgroup.appendChild(option);
-                });
-                reactorEl.appendChild(optgroup);
+                
+                if (reactorGroups[type] && reactorGroups[type].length > 0) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = categories[type];
+                    reactorGroups[type].forEach(reactor => {
+                        const option = document.createElement('option');
+                        option.value = reactor.id;
+                        option.textContent = reactor.name;
+                        optgroup.appendChild(option);
+                    });
+                    reactorEl.appendChild(optgroup);
+                }
             }
         }
 
